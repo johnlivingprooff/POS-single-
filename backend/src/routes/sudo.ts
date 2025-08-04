@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
@@ -8,7 +8,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 // Sudo admin login endpoint
-router.post('/login', async (req, res) => {
+router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Get all organizations
-router.get('/organizations', sudoAuth, async (req: SudoAuthRequest, res) => {
+router.get('/organizations', sudoAuth, async (req: SudoAuthRequest, res: Response) => {
   try {
     // @ts-ignore - Prisma client regeneration in progress
     const organizations = await prisma.organization.findMany({
@@ -331,7 +331,7 @@ router.put('/organizations/:id/features', sudoAuth, async (req: SudoAuthRequest,
 });
 
 // Delete organization
-router.delete('/organizations/:id', sudoAuth, async (req: SudoAuthRequest, res) => {
+router.delete('/organizations/:id', sudoAuth, async (req: SudoAuthRequest, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -382,7 +382,7 @@ router.delete('/organizations/:id', sudoAuth, async (req: SudoAuthRequest, res) 
 });
 
 // Get system analytics
-router.get('/analytics', sudoAuth, async (req: SudoAuthRequest, res) => {
+router.get('/analytics', sudoAuth, async (req: SudoAuthRequest, res: Response) => {
   try {
     const analytics = {
       totalOrganizations: 3,
@@ -420,7 +420,7 @@ router.get('/analytics', sudoAuth, async (req: SudoAuthRequest, res) => {
 });
 
 // Get subscription plans
-router.get('/subscription-plans', sudoAuth, async (req: SudoAuthRequest, res) => {
+router.get('/subscription-plans', sudoAuth, async (req: SudoAuthRequest, res: Response) => {
   try {
     const plans = [
       {

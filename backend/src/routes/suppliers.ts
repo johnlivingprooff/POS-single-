@@ -154,7 +154,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 });
 
 // PATCH /api/suppliers/:id/deactivate
-router.patch('/:id/deactivate', async (req, res) => {
+router.patch('/:id/deactivate', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const supplier = await prisma.supplier.update({
@@ -168,7 +168,7 @@ router.patch('/:id/deactivate', async (req, res) => {
 });
 
 // PATCH /api/suppliers/:id/activate
-router.patch('/:id/activate', async (req, res) => {
+router.patch('/:id/activate', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const supplier = await prisma.supplier.update({

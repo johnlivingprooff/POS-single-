@@ -24,7 +24,7 @@ function App() {
 
   // Regular app access
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <ToastProvider><LoginPage /></ToastProvider>;
   }
 
   return (
