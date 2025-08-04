@@ -1,0 +1,14 @@
+.github
+.vscode
+node_modules
+dist
+.env
+docker/
+.env.*
+.env.local
+.env.development
+.env.test
+.env.production
+.env.example
+scripsts/
+database/

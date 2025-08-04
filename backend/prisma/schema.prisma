@@ -1,0 +1,545 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  password       String
+  name           String
+  role           String   @default("employee")
+  permissions    String[]
+  isActive       Boolean  @default(true)
+  organizationId String?  // Multi-tenant support
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization           Organization? @relation(fields: [organizationId], references: [id])
+  sales                  Sale[]
+  sessions               UserSession[]
+  notifications          Notification[] @relation("UserNotifications")
+  notificationSettings   NotificationSettings? @relation("UserNotificationSettings")
+  requisitions           OffSiteRequisition[] @relation("UserRequisitions")
+
+  @@map("users")
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model Category {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  isActive       Boolean  @default(true)
+  organizationId String?  // Multi-tenant support
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  products     Product[]
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@unique([name, organizationId]) // Ensure unique category names per organization
+  @@map("categories")
+}
+
+model Supplier {
+  id             String   @id @default(cuid())
+  name           String
+  contactName    String?
+  email          String?
+  phone          String?
+  address        String?
+  isActive       Boolean  @default(true)
+  organizationId String?  // Multi-tenant support
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  products       Product[]
+  purchaseOrders PurchaseOrder[] @relation("SupplierPurchaseOrders")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@map("suppliers")
+}
+
+model Product {
+  id                  String   @id @default(cuid())
+  name                String
+  sku                 String
+  description         String?
+  price               Decimal  @db.Decimal(10, 2)
+  costPrice           Decimal  @db.Decimal(10, 2)
+  unitCost            Decimal  @default(0) @db.Decimal(10, 4) // For raw_material: costPrice/measurementValue; 0 for others
+  stock               Int      @default(0)
+  reorderLevel        Int      @default(0)
+  stockType           String   @default("raw_material") // 'raw_material', 'asset_equipment', or 'finished_good'
+  measurementType     String? // e.g. 'grams', 'kg', 'liters', 'units', etc. Only for raw_material
+  measurementValue    Int? // e.g. 500 (grams), 2 (liters), etc. Only for raw_material
+  availableQuantities Int      @default(0) // For raw_material: stock * measurementValue; 0 for others
+  categoryId          String?
+  supplierId          String?
+  organizationId      String?  // Multi-tenant support
+  pricingMethod       String?  @default("markup") // 'markup', 'margin', 'fixed'
+  pricingOverride     Boolean  @default(false)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
+  saleItems      SaleItem[]
+  inventoryLogs  InventoryLog[]
+  purchaseOrders PurchaseOrder[]
+
+  // BOM relations
+  bom      BOM?      @relation("ProductBOM")
+  bomItems BOMItem[] @relation("RawMaterialBOMItem")
+
+  // Purchase batch relation
+  purchaseBatches ProductPurchaseBatch[]
+
+  @@unique([sku, organizationId]) // Ensure unique SKUs per organization
+
+  // Off-site inventory relations
+  offsiteItems   OffSiteRequisitionItem[] @relation("ProductOffSiteItems")
+  offsiteReturns OffSiteReturnItem[] @relation("ProductOffSiteReturns")
+
+  @@map("products")
+}
+
+// --- Purchase Batches for Inventory Costing ---
+model ProductPurchaseBatch {
+  id              String   @id @default(cuid())
+  productId       String
+  quantity        Int // Total quantity purchased in this batch
+  remaining       Int // Remaining quantity in this batch
+  costPrice       Decimal  @db.Decimal(10, 2) // Cost per unit
+  receivedAt      DateTime @default(now())
+  purchaseOrderId String?
+  batchRef       String? // Optional batch reference
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  product       Product        @relation(fields: [productId], references: [id])
+  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+
+  @@index([productId])
+  @@map("product_purchase_batches")
+}
+
+/// Stores global settings for the POS system, including inventory calculation method
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. 'inventoryCalculationMethod'
+  value     String // e.g. 'fifo', 'lifo', 'wac'
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  loyaltyPoints  Int      @default(0)
+  isActive       Boolean  @default(true)
+  organizationId String?  // Multi-tenant support
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  sales        Sale[]
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@map("customers")
+}
+
+model Sale {
+  id             String   @id @default(cuid())
+  saleNumber     String
+  customerId     String?
+  userId         String
+  subtotal       Decimal  @db.Decimal(10, 2)
+  tax            Decimal  @default(0) @db.Decimal(10, 2)
+  discount       Decimal  @default(0) @db.Decimal(10, 2)
+  total          Decimal  @db.Decimal(10, 2)
+  paymentMethod  String
+  status         String   @default("completed") // completed, void, refunded
+  notes          String?
+  organizationId String?  // Multi-tenant support
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  customer     Customer?     @relation(fields: [customerId], references: [id])
+  user         User          @relation(fields: [userId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  items        SaleItem[]
+
+  @@unique([saleNumber, organizationId]) // Ensure unique sale numbers per organization
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  productId String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+
+  // Relations
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("sale_items")
+}
+
+model InventoryLog {
+  id            String   @id @default(cuid())
+  productId     String
+  type          String // stock_in, stock_out, adjustment, sale, return
+  quantity      Int
+  previousStock Int
+  newStock      Int
+  reason        String?
+  reference     String? // sale ID, purchase order, etc.
+  createdAt     DateTime @default(now())
+
+  // Relations
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("inventory_logs")
+}
+
+model InventoryConfig {
+  id              String   @id @default(cuid())
+  calculateMethod String   @default("fifo") // 'fifo', 'lifo', 'wac'
+  updatedAt       DateTime @updatedAt
+
+  @@map("inventory_config")
+}
+
+model ManufacturingOrder {
+  id             String    @id @default(cuid())
+  orderNumber    String
+  productId      String? // finished product
+  quantity       Int
+  status         String    @default("pending") // pending, in_progress, completed, cancelled
+  startDate      DateTime?
+  endDate        DateTime?
+  notes          String?
+  organizationId String?   // Multi-tenant support
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  items        ManufacturingOrderItem[]
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@unique([orderNumber, organizationId]) // Ensure unique order numbers per organization
+  @@map("manufacturing_orders")
+}
+
+model ManufacturingOrderItem {
+
+  id        String @id @default(cuid())
+  orderId   String
+  productId String // raw material/component
+  quantity  Int
+  consumed  Int    @default(0)
+
+  // Relations
+  order ManufacturingOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("manufacturing_order_items")
+}
+
+model PurchaseOrder {
+  id               String   @id @default(cuid())
+  orderNumber      String
+  productId        String
+  supplierId       String
+  quantity         Int
+  costPrice        Decimal  @db.Decimal(10, 2)
+  expectedDelivery DateTime
+  status           String   @default("pending") // pending, delivered, cancelled
+  organizationId   String?  // Multi-tenant support
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  product         Product                @relation(fields: [productId], references: [id])
+  supplier        Supplier               @relation("SupplierPurchaseOrders", fields: [supplierId], references: [id])
+  organization    Organization?          @relation(fields: [organizationId], references: [id])
+  purchaseBatches ProductPurchaseBatch[]
+
+  @@unique([orderNumber, organizationId]) // Ensure unique order numbers per organization
+  @@map("purchase_orders")
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  type        String // restock_alert, delivery_confirm, system
+  message     String
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  scheduledAt DateTime?
+
+  // Relations
+  user User @relation("UserNotifications", fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model NotificationSettings {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  soundEnabled         Boolean  @default(true)
+  browserNotifications Boolean  @default(false)
+  emailNotifications   Boolean  @default(true)
+  lowStockAlerts       Boolean  @default(true)
+  salesNotifications   Boolean  @default(true)
+  systemUpdates        Boolean  @default(true)
+  pollingInterval      Int      @default(30000)
+  quietHoursStart      String?
+  quietHoursEnd        String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  // Relations
+  user User @relation("UserNotificationSettings", fields: [userId], references: [id])
+
+  @@map("notification_settings")
+}
+
+model SalesSettings {
+  id                         String   @id @default(cuid())
+  defaultPricingMethod       String   @default("markup") // 'markup', 'margin', 'fixed'
+  defaultMarkupPercentage    Float    @default(25)
+  defaultMarginPercentage    Float    @default(20)
+  enablePriceRounding        Boolean  @default(true)
+  roundingRule               String   @default("nearest_cent") // 'nearest_cent', 'end_in_99', 'round_to_5'
+  showCalculationDetails     Boolean  @default(true)
+  allowProductLevelOverrides Boolean  @default(true)
+  updatedAt                  DateTime @updatedAt
+
+  @@map("sales_settings")
+}
+
+// --- Bill of Materials (BOM) ---
+model BOM {
+  id          String   @id @default(cuid())
+  productId   String // finished good product
+  name        String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  product Product   @relation("ProductBOM", fields: [productId], references: [id])
+  items   BOMItem[]
+
+  @@unique([productId])
+  @@map("boms")
+}
+
+model BOMItem {
+  id            String   @id @default(cuid())
+  bomId         String
+  rawMaterialId String // references Product (raw material)
+  quantity      Int
+  createdAt     DateTime @default(now())
+
+  // Relations
+  bom         BOM     @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  rawMaterial Product @relation("RawMaterialBOMItem", fields: [rawMaterialId], references: [id])
+
+  @@map("bom_items")
+}
+
+// --- Off-Site Inventory Management ---
+model OffSiteRequisition {
+  id          String   @id @default(cuid())
+  requesterId String
+  destination String
+  purpose     String?
+  status      String   @default("pending") // pending, approved, dispatched, returned, cancelled
+  requestDate DateTime @default(now())
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  requester User                     @relation("UserRequisitions", fields: [requesterId], references: [id])
+  items     OffSiteRequisitionItem[]
+  returns   OffSiteReturn[]
+
+  @@map("offsite_requisitions")
+}
+
+model OffSiteRequisitionItem {
+  id            String @id @default(cuid())
+  requisitionId String
+  productId     String
+  quantityOut   Int
+  quantityReturned Int @default(0)
+  quantityLost  Int    @default(0)
+
+  // Relations
+  requisition OffSiteRequisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+  product     Product            @relation("ProductOffSiteItems", fields: [productId], references: [id])
+
+  @@map("offsite_requisition_items")
+}
+
+model OffSiteReturn {
+  id            String   @id @default(cuid())
+  requisitionId String
+  returnDate    DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  requisition OffSiteRequisition     @relation(fields: [requisitionId], references: [id])
+  items       OffSiteReturnItem[]
+
+  @@map("offsite_returns")
+}
+
+model OffSiteReturnItem {
+  id               String @id @default(cuid())
+  returnId         String
+  productId        String
+  quantityReturned Int
+  quantityDamaged  Int    @default(0)
+  quantityLost     Int    @default(0)
+
+  // Relations
+  return  OffSiteReturn @relation(fields: [returnId], references: [id], onDelete: Cascade)
+  product Product       @relation("ProductOffSiteReturns", fields: [productId], references: [id])
+
+  @@map("offsite_return_items")
+}
+
+// Multi-tenancy and subscription management models
+
+model Organization {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique // Used for subdomain routing
+  domain           String?  // Custom domain (optional)
+  subscriptionPlan String   @default("trial") // trial, basic, premium, enterprise
+  isActive         Boolean  @default(true)
+  maxUsers         Int      @default(5)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  users            User[]
+  subscriptions    Subscription[]
+  featureToggles   FeatureToggle[]
+  settings         OrganizationSettings[]
+  
+  // Multi-tenant data relations
+  categories           Category[]
+  suppliers            Supplier[]
+  products             Product[]
+  customers            Customer[]
+  sales                Sale[]
+  purchaseOrders       PurchaseOrder[]
+  manufacturingOrders  ManufacturingOrder[]
+
+  @@map("organizations")
+}
+
+model Subscription {
+  id             String   @id @default(cuid())
+  organizationId String
+  planName       String   // trial, basic, premium, enterprise
+  status         String   // active, cancelled, expired, suspended
+  startDate      DateTime
+  endDate        DateTime?
+  billingCycle   String   // monthly, yearly
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("USD")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model FeatureToggle {
+  id             String   @id @default(cuid())
+  organizationId String
+  featureKey     String   // pos, inventory, manufacturing, offsite, crm, reports, users
+  isEnabled      Boolean  @default(true)
+  limitations    Json?    // JSON object for feature-specific limits
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, featureKey])
+  @@map("feature_toggles")
+}
+
+model OrganizationSettings {
+  id             String   @id @default(cuid())
+  organizationId String
+  key            String   // currency, timezone, language, theme, etc.
+  value          String
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, key])
+  @@map("organization_settings")
+}
+
+model SudoUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("sudo_admin") // sudo_admin only
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sudo_users")
+}
