@@ -25,7 +25,7 @@ const CurrencySettings: React.FC = () => {
 
   const fetchCurrencySettings = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = process.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/settings/currency`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -40,7 +40,7 @@ const CurrencySettings: React.FC = () => {
 
   const fetchAvailableCurrencies = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = process.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/settings/currencies`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -56,7 +56,7 @@ const CurrencySettings: React.FC = () => {
   const updateCurrency = async (newCurrency: string) => {
     try {
       setLoading(true);
-      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = process.env.VITE_API_URL || '';
       const response = await fetch(`${apiUrl}/api/settings/currency`, {
         method: 'PUT',
         headers: {
@@ -109,14 +109,14 @@ const CurrencySettings: React.FC = () => {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label className="block mb-2 text-sm font-medium">
             Current Currency: {currentCurrency}
           </label>
           
           <div className="space-y-4">
             {Object.entries(groupedCurrencies).map(([region, currencies]) => (
               <div key={region}>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">{region}</h4>
+                <h4 className="mb-2 text-sm font-medium text-gray-700">{region}</h4>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
                   {currencies.map((currency) => (
                     <button
