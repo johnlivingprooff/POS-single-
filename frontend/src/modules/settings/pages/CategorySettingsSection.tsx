@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 
 interface Category {
   id: string;
@@ -9,6 +11,7 @@ interface Category {
 }
 
 const CategorySettingsSection: React.FC = () => {
+  const { token } = useAuthStore();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<{ name: string; description: string }>({ name: '', description: '' });
   const [editCategory, setEditCategory] = useState<Category | null>(null);
@@ -18,7 +21,7 @@ const CategorySettingsSection: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/categories');
+      const res = await apiFetch('/categories', token);
       if (!res.ok) throw new Error('Failed to fetch categories');
       return res.json();
     }
@@ -28,7 +31,7 @@ const CategorySettingsSection: React.FC = () => {
   // Create category
   const createMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const res = await fetch('/api/categories', {
+      const res = await apiFetch('/categories', token, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -45,7 +48,7 @@ const CategorySettingsSection: React.FC = () => {
   // Update category
   const updateMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const res = await fetch(`/api/categories/${editCategory?.id}`, {
+      const res = await apiFetch(`/categories/${editCategory?.id}`, token, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -63,7 +66,7 @@ const CategorySettingsSection: React.FC = () => {
   // Delete category
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await apiFetch(`/categories/${id}`, token, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error('Failed to delete category');

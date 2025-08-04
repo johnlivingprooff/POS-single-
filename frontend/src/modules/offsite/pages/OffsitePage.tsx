@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useAppToast } from '../../../hooks/useAppToast';
+import { apiFetch } from '../../../lib/api-utils';
 import {
   PlusIcon,
   MapPinIcon,
@@ -43,9 +44,7 @@ const OffsitePage: React.FC = () => {
   } = useQuery({
     queryKey: ['offsiteRequisitions'],
     queryFn: async () => {
-      const res = await fetch('/api/offsite/requisitions', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/offsite/requisitions', token);
       if (!res.ok) throw new Error('Failed to fetch requisitions');
       return res.json();
     }
@@ -55,9 +54,7 @@ const OffsitePage: React.FC = () => {
   const { data: summary } = useQuery({
     queryKey: ['offsiteSummary'],
     queryFn: async () => {
-      const res = await fetch('/api/offsite/summary', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/offsite/summary', token);
       if (!res.ok) throw new Error('Failed to fetch summary');
       return res.json();
     }
@@ -66,11 +63,10 @@ const OffsitePage: React.FC = () => {
   // Create requisition mutation
   const createRequisitionMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await fetch('/api/offsite/requisitions', {
+      const res = await apiFetch('/offsite/requisitions', token, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
       });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
 import { RefreshCw } from 'lucide-react';
 import Modal from '../../../components/Modal';
@@ -79,9 +80,7 @@ const InventoryPage: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/manufacturing/bom', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await apiFetch('/manufacturing/bom', token);
         if (!res.ok) throw new Error('Failed to fetch BOMs');
         const data = await res.json();
         setBomList(data.boms || []);
@@ -143,12 +142,8 @@ const InventoryPage: React.FC = () => {
     setManufactureLoading(true);
     try {
       // Call backend to create manufacturing order and update stock
-      const res = await fetch('/api/manufacturing/orders', {
+      const res = await apiFetch('/manufacturing/orders', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({
           productId: selectedBOM.productId,
           quantity: manufactureForm.quantity,
@@ -258,12 +253,8 @@ const InventoryPage: React.FC = () => {
   const handleAddProduct = async (data: any) => {
     setAddProductLoading(true);
     try {
-      const res = await fetch('/api/products', {
+      const res = await apiFetch('/products', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error('Failed to add product');
@@ -624,12 +615,8 @@ const InventoryPage: React.FC = () => {
             onSubmit={async (data) => {
               setPOFormLoading(true);
               try {
-                const res = await fetch('/api/purchase-orders', {
+                const res = await apiFetch('/purchase-orders', token, {
                   method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                  },
                   body: JSON.stringify(data)
                 });
                 if (!res.ok) throw new Error('Failed to create purchase order');

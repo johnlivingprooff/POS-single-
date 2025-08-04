@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppToast } from '../../../hooks/useAppToast';
+import { apiFetch } from '../../../lib/api-utils';
 import Modal from '../../../components/Modal';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import TableSkeleton from '../../../components/TableSkeleton';
@@ -22,9 +23,7 @@ import { useAuthStore } from '../../../stores/authStore';
 
 // Fetch BOMs for manufacturing
 function fetchBOMs(token: any) {
-  return fetch('/api/manufacturing/bom', {
-    headers: { Authorization: `Bearer ${token}` },
-  }).then(res => {
+  return apiFetch('/manufacturing/bom', token).then(res => {
     if (!res.ok) throw new Error('Failed to fetch BOMs');
     return res.json();
   });
@@ -113,7 +112,7 @@ export default function BOMTable() {
     Promise.all([
       fetchProducts(token, 'finished_good'),
       fetchProducts(token, 'raw_material'),
-      fetch('/api/categories', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.ok ? res.json() : { categories: [] })
+      apiFetch('/categories', token).then(res => res.ok ? res.json() : { categories: [] })
     ]).then(([fg, rm, cat]) => {
       setFinishedGoods(fg.products || []);
       setRawMaterials(rm.products || []);
@@ -211,12 +210,8 @@ export default function BOMTable() {
         finishedGoodToSend.categoryId = fg.category;
         delete finishedGoodToSend.category;
       }
-      const res = await fetch('/api/manufacturing/bom', {
+      const res = await apiFetch('/manufacturing/bom', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({
           finishedGood: finishedGoodToSend,
           components: form.components

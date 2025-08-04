@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useAppToast } from '../../../hooks/useAppToast';
+import { apiFetch } from '../../../lib/api-utils';
 
 const calculationOptions = [
   { value: 'fifo', label: 'FIFO (First In, First Out)' },
@@ -24,9 +25,7 @@ const InventorySettingsSection: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['inventoryCalculationMethod'],
     queryFn: async () => {
-      const res = await fetch('/api/settings/inventoryCalculationMethod', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/settings/inventoryCalculationMethod', token);
       if (!res.ok) throw new Error('Failed to fetch settings');
       return res.json();
     }
@@ -40,11 +39,10 @@ const InventorySettingsSection: React.FC = () => {
   // Update setting
   const mutation = useMutation({
     mutationFn: async (method: string) => {
-      const res = await fetch('/api/settings/inventoryCalculationMethod', {
+      const res = await apiFetch('/settings/inventoryCalculationMethod', token, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ value: method })
       });

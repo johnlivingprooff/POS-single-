@@ -1,15 +1,14 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 
 const ProcurementHistoryTable: React.FC = () => {
   const { token } = useAuthStore();
   const { data, isLoading } = useQuery({
     queryKey: ['allPurchaseOrders'],
     queryFn: async () => {
-      const res = await fetch('/api/purchase-orders', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/purchase-orders', token);
       if (!res.ok) throw new Error('Failed to fetch purchase orders');
       return res.json();
     }

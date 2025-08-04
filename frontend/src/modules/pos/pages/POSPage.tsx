@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 import { Scan, Plus, Minus, Trash2, ShoppingCart, CreditCard } from 'lucide-react';
 import { useAppToast } from '../../../hooks/useAppToast';
 import { generateReceiptPDF } from '../../../components/ReceiptPDF';
@@ -50,9 +51,7 @@ const POSPage: React.FC = () => {
   } = useQuery({
     queryKey: ['taxSettings'],
     queryFn: async () => {
-      const res = await fetch('/api/settings/tax', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await apiFetch('/settings/tax', token);
       if (!res.ok) throw new Error('Failed to fetch tax settings');
       return res.json();
     }
@@ -73,9 +72,7 @@ const POSPage: React.FC = () => {
   } = useQuery({
     queryKey: ['posCustomers'],
     queryFn: async () => {
-      const res = await fetch('/api/customers?limit=100', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/customers?limit=100', token);
       if (!res.ok) throw new Error('Failed to fetch customers');
       return res.json();
     }
@@ -90,9 +87,7 @@ const POSPage: React.FC = () => {
   } = useQuery({
     queryKey: ['posProducts'],
     queryFn: async () => {
-      const res = await fetch('/api/products?limit=100', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/products?limit=100', token);
       if (!res.ok) throw new Error('Failed to fetch products');
       return res.json();
     }
@@ -242,12 +237,8 @@ const POSPage: React.FC = () => {
       if (selectedCustomerId) {
         salePayload.customerId = selectedCustomerId;
       }
-      const res = await fetch('/api/sales', {
+      const res = await apiFetch('/sales', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(salePayload)
       });
       if (!res.ok) {

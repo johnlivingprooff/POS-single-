@@ -3,32 +3,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useForm } from 'react-hook-form';
 import CurrencySettings from '../components/CurrencySettings';
+import { apiFetch } from '../../../lib/api-utils';
 
-
-// API helpers with JWT auth
-function getAuthHeaders(token: string) {
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 async function fetchGeneralSettingsWithAuth(token: string) {
-  const res = await fetch('/api/settings/general', {
-    credentials: 'include',
-    headers: {
-      ...getAuthHeaders(token)
-    }
-  });
+  const res = await apiFetch('/settings/general', token);
   if (!res.ok) throw new Error('Failed to fetch settings');
   return res.json();
 }
 
 async function updateGeneralSettingsWithAuth(data: any, token: string) {
-  const res = await fetch('/api/settings/general', {
+  const res = await apiFetch('/settings/general', token, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(token)
+      'Content-Type': 'application/json'
     },
-    credentials: 'include',
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error('Failed to update settings');
@@ -43,8 +32,10 @@ export default function GeneralSettingsSection() {
   const token = useAuthStore(state => state.token);
 
   // Wrap fetchers to inject token
-  const { data, isLoading, error } = useQuery(['generalSettings', token], () => fetchGeneralSettingsWithAuth(token));
-  const mutation = useMutation((formData: any) => updateGeneralSettingsWithAuth(formData, token), {
+  const { data, isLoading, error } = useQuery(['generalSettings', token], () => fetchGeneralSettingsWithAuth(token!), {
+    enabled: !!token
+  });
+  const mutation = useMutation((formData: any) => updateGeneralSettingsWithAuth(formData, token!), {
     onSuccess: () => queryClient.invalidateQueries(['generalSettings', token])
   });
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({

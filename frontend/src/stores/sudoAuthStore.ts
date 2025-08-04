@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { apiFetch } from '../lib/api-utils';
 
 interface SudoUser {
   id: string;
@@ -27,8 +28,8 @@ export const useSudoAuthStore = create<SudoAuthState>()(
 
       login: async (email: string, password: string) => {
         try {
-          // Use relative URL that works with Vite proxy
-          const response = await fetch('/api/sudo/login', {
+          // Use apiFetch for consistent API handling
+          const response = await apiFetch('/sudo/login', null, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

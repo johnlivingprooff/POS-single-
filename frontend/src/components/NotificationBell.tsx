@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { BellIcon, CheckCircleIcon, EyeIcon, ClockIcon, Settings } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+import { apiFetch } from '../lib/api-utils';
 import { useNavigate } from 'react-router-dom';
 import NotificationBadge from './NotificationBadge';
 
@@ -23,9 +24,7 @@ export default function NotificationBell({ className }: { className?: string }) 
   const { data, refetch } = useQuery<{ notifications: Notification[] }>({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const res = await fetch('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/notifications', token);
       if (!res.ok) throw new Error('Failed to fetch notifications');
       return res.json();
     },
@@ -46,9 +45,8 @@ export default function NotificationBell({ className }: { className?: string }) 
 
   const markAllAsRead = useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/notifications/mark-all-read', {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch('/notifications/mark-all-read', token, {
+        method: 'PUT'
       });
       if (!res.ok) throw new Error('Failed to mark all as read');
       return res.json();

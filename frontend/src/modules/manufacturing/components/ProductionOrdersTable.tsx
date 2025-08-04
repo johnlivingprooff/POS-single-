@@ -1,4 +1,6 @@
 import { Eye, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { apiFetch } from '../../../lib/api-utils';
+
 // Utility to find finished good name by productId
 function getFinishedGoodName(productId: string, products: any[]): string {
   if (!productId) return '-';
@@ -7,21 +9,15 @@ function getFinishedGoodName(productId: string, products: any[]): string {
 }
 // --- Utility functions ---
 function fetchProducts(token: string) {
-  return fetch('/api/products?stockType=finished_good', {
-    headers: { Authorization: `Bearer ${token}` },
-  }).then(res => {
+  return apiFetch('/products?stockType=finished_good', token).then(res => {
     if (!res.ok) throw new Error('Failed to fetch products');
     return res.json();
   });
 }
 
 function createOrder({ productId, quantity, notes, token }: { productId: string, quantity: number, notes?: string, token: string }) {
-  return fetch('/api/manufacturing/orders', {
+  return apiFetch('/manufacturing/orders', token, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
     body: JSON.stringify({ productId, quantity, notes })
   }).then(res => {
     if (!res.ok) throw new Error('Failed to create order');
@@ -179,9 +175,7 @@ import TableSkeleton from '../../../components/TableSkeleton';
 
 // --- Utility functions ---
 function fetchOrders(token: string) {
-  return fetch('/api/manufacturing/orders', {
-    headers: { Authorization: `Bearer ${token}` },
-  }).then(async res => {
+  return apiFetch('/manufacturing/orders', token).then(async res => {
     if (!res.ok) throw new Error('Failed to fetch orders');
     const data = await res.json();
     // Ensure each order has product details (name, sku)

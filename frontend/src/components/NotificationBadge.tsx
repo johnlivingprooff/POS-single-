@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../stores/authStore';
+import { apiFetch } from '../lib/api-utils';
 
 interface NotificationBadgeProps {
   children: React.ReactNode;
@@ -13,9 +14,7 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({ children, classNa
   const { data } = useQuery({
     queryKey: ['notification-count'],
     queryFn: async () => {
-      const res = await fetch('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/notifications', token);
       if (!res.ok) throw new Error('Failed to fetch notifications');
       return res.json();
     },

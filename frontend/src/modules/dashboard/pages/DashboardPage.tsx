@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 import {
   ShoppingCart,
   Package,
@@ -21,12 +22,8 @@ const DashboardPage: React.FC = () => {
   const handleAddProduct = async (data: any) => {
     setAddProductLoading(true);
     try {
-      const res = await fetch('/api/products', {
+      const res = await apiFetch('/products', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error('Failed to add product');
@@ -55,9 +52,7 @@ const DashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['dashboardStats'],
     queryFn: async () => {
-      const res = await fetch('/api/sales/stats/summary?period=today', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/sales/stats/summary?period=today', token);
       if (!res.ok) {
         const errText = await res.text();
         const err = new Error(errText || 'Failed to fetch sales stats');
@@ -80,9 +75,7 @@ const DashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['recentTransactions'],
     queryFn: async () => {
-      const res = await fetch('/api/sales?limit=5', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/sales?limit=5', token);
       if (!res.ok) {
         const errText = await res.text();
         const err = new Error(errText || 'Failed to fetch transactions');
@@ -105,9 +98,7 @@ const DashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['inventoryStats'],
     queryFn: async () => {
-      const res = await fetch('/api/inventory/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/inventory/stats', token);
       if (!res.ok) {
         const errText = await res.text();
         const err = new Error(errText || 'Failed to fetch inventory stats');
@@ -129,9 +120,7 @@ const DashboardPage: React.FC = () => {
   } = useQuery({
     queryKey: ['totalCustomers'],
     queryFn: async () => {
-      const res = await fetch('/api/customers?limit=1', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/customers?limit=1', token);
       if (!res.ok) throw new Error('Failed to fetch customers');
       return res.json();
     },

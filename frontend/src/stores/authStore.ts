@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { apiFetch } from '../lib/api-utils';
 
 interface User {
   id: string;
@@ -28,11 +29,8 @@ export const useAuthStore = create<AuthState>()(
       
       login: async (email: string, password: string) => {
         try {
-          const response = await fetch('/api/auth/login', {
+          const response = await apiFetch('/auth/login', null, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             body: JSON.stringify({ email, password }),
           });
 

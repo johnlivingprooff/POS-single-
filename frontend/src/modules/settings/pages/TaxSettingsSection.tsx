@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 
 interface TaxSettings {
   id?: string;
@@ -31,9 +32,7 @@ const TaxSettingsSection: React.FC = () => {
   const fetchTaxSettings = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/settings/tax', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/settings/tax', token);
       if (res.ok) {
         const data = await res.json();
         setSettings(data);
@@ -48,11 +47,10 @@ const TaxSettingsSection: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/settings/tax', {
+      const res = await apiFetch('/settings/tax', token, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(settings)
       });

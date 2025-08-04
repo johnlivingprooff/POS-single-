@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useAppToast } from '../../../hooks/useAppToast';
+import { apiFetch } from '../../../lib/api-utils';
 
 const pricingMethods = [
   {
@@ -39,9 +40,7 @@ const SalesPricingConfiguration: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['salesPricingConfiguration'],
     queryFn: async () => {
-      const res = await fetch('/api/settings/sales/pricingConfiguration', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch('/settings/sales/pricingConfiguration', token);
       if (!res.ok) throw new Error('Failed to fetch pricing configuration');
       return res.json();
     },
@@ -59,11 +58,10 @@ const SalesPricingConfiguration: React.FC = () => {
   // Update config mutation
   const mutation = useMutation({
     mutationFn: async (config: any) => {
-      const res = await fetch('/api/settings/sales/pricingConfiguration', {
+      const res = await apiFetch('/settings/sales/pricingConfiguration', token, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(config),
       });

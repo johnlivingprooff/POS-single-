@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 import { useAppToast } from '../../../hooks/useAppToast';
 import { PlusIcon, PencilIcon, TrashIcon, UserPlusIcon } from 'lucide-react';
 
@@ -41,9 +42,7 @@ const UsersPage: React.FC = () => {
   const { data: usersData, isLoading: usersLoading, isError: usersError } = useQuery({
     queryKey: ['usersList'],
     queryFn: async () => {
-      const res = await fetch('/api/users?limit=100', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users?limit=100', token);
       if (!res.ok) throw new Error('Failed to fetch users');
       return res.json();
     }
@@ -52,12 +51,8 @@ const UsersPage: React.FC = () => {
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: CreateUserData) => {
-      const res = await fetch('/api/users', {
+      const res = await apiFetch('/users', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(userData)
       });
       if (!res.ok) {
@@ -80,12 +75,8 @@ const UsersPage: React.FC = () => {
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, userData }: { id: string; userData: Partial<User> }) => {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await apiFetch(`/users/${id}`, token, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(userData)
       });
       if (!res.ok) {
@@ -108,9 +99,8 @@ const UsersPage: React.FC = () => {
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const res = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`/users/${userId}`, token, {
+        method: 'DELETE'
       });
       if (!res.ok) {
         const error = await res.json();

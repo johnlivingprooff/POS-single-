@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '../stores/authStore';
+import { apiFetch } from '../lib/api-utils';
 import SupplierSelect from './SupplierSelect';
 
 interface CategoryOrSupplier {
@@ -29,6 +31,7 @@ interface ProductFormProps {
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, initialValues, isFinishedGood }) => {
+  const { token } = useAuthStore();
   // Determine if editing
   const isEdit = !!initialValues?.name;
   // Only restrict fields for raw_material edit
@@ -40,7 +43,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
   const { data: categoryData, isLoading: categoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/categories');
+      const res = await apiFetch('/categories', token);
       if (!res.ok) throw new Error('Failed to fetch categories');
       return res.json();
     }

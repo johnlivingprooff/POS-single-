@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProcurementHistoryTable from '../components/ProcurementHistoryTable';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 import { useAppToast } from '../../../hooks/useAppToast';
 import { useNavigate } from 'react-router-dom';
 import { Search, Users, Plus, Edit, Trash2, RotateCcw } from 'lucide-react';
@@ -114,12 +115,8 @@ const SuppliersPage: React.FC = () => {
 
     const purchaseOrderMutation = useMutation({
         mutationFn: async (form: any) => {
-            const res = await fetch('/api/purchase-orders', {
+            const res = await apiFetch('/purchase-orders', token, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
                 body: JSON.stringify(form)
             });
             if (!res.ok) throw new Error('Failed to create purchase order');
