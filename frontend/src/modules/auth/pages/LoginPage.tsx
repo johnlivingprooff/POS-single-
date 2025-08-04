@@ -15,14 +15,9 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
-      const { user, token } = response.data;
-      login(user, token);
+      await login(email, password);
     } catch (error: any) {
-      const msg = error?.response?.data?.message || error.message || 'Login failed';
+      const msg = error?.message || 'Login failed';
       setToastMsg(msg);
       setToastOpen(true);
     } finally {
