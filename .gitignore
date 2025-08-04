@@ -3,12 +3,11 @@
 node_modules
 dist
 .env
-docker/
-.env.*
 .env.local
 .env.development
 .env.test
 .env.production
-.env.example
-scripsts/
-database/
+!.env.example
+!.env.production.example
+scripts/deleteFinishedGoods.js
+MULTI_TENANT_REMOVAL_SUMMARY.md

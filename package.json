@@ -1,9 +1,38 @@
 {
+  "name": "habicore-pos",
+  "version": "1.0.0",
+  "description": "Habicore POS System - Single Tenant",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm install && npx prisma generate && npm run build",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "start": "cd backend && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules backend/dist frontend/dist"
+  },
+  "keywords": [
+    "pos",
+    "point-of-sale",
+    "inventory",
+    "manufacturing",
+    "retail"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "dependencies": {
     "jspdf": "^3.0.1"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "concurrently": "^8.2.0"
   }
 }

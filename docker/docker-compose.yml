@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: habicore_pos
+      POSTGRES_USER: habicore_user
+      POSTGRES_PASSWORD: habicore_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - habicore_network
+
+  # Redis for caching and sessions (optional)
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - habicore_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://habicore_user:habicore_password@postgres:5432/habicore_pos
+      JWT_SECRET: your-super-secret-jwt-key-change-this
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - habicore_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend (for production)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - habicore_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  habicore_network:
+    driver: bridge

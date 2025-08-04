@@ -90,6 +90,64 @@ habicore-pos/
    npm start
    ```
 
+## Deployment
+
+### Quick Deployment
+
+Use the deployment scripts to prepare your application:
+
+```bash
+# Windows (PowerShell)
+.\deploy.ps1
+
+# Linux/Mac
+./deploy.sh
+```
+
+### Render.com Deployment
+
+This application is optimized for deployment on Render.com with:
+
+- **PostgreSQL Database** (Free tier available)
+- **Node.js Backend** (Web Service)
+- **React Frontend** (Static Site)
+
+See `RENDER_DEPLOYMENT_GUIDE.md` for detailed deployment instructions.
+
+### Environment Configuration
+
+Create environment files:
+
+**Backend (.env)**:
+```bash
+DATABASE_URL=postgresql://user:pass@host:port/db
+JWT_SECRET=your-secure-secret
+NODE_ENV=production
+CORS_ORIGIN=https://your-frontend-url.com
+```
+
+**Frontend (.env.production)**:
+```bash
+VITE_API_URL=https://your-backend-url.com
+NODE_ENV=production
+```
+
+### One-Click Deployment
+
+Use the included `render.yaml` file for automated deployment:
+
+1. Fork this repository
+2. Connect to Render.com
+3. Deploy all services at once
+
+## Production Features
+
+- **Single-Tenant Architecture**: Simplified deployment and management
+- **Batch-Based Inventory**: FIFO/LIFO/WAC costing methods
+- **Manufacturing Management**: BOM-based production
+- **Real-time Notifications**: Inventory alerts and system updates
+- **Comprehensive Reporting**: Sales, inventory, and financial reports
+
 ## Development Principles
 
 - **Modularity**: Each module operates independently

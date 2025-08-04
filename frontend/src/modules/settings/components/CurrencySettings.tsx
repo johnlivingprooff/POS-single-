@@ -25,7 +25,8 @@ const CurrencySettings: React.FC = () => {
 
   const fetchCurrencySettings = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/settings/currency`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/settings/currency`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -39,7 +40,8 @@ const CurrencySettings: React.FC = () => {
 
   const fetchAvailableCurrencies = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/settings/currencies', {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/settings/currencies`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -54,7 +56,8 @@ const CurrencySettings: React.FC = () => {
   const updateCurrency = async (newCurrency: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3001/api/settings/currency`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const response = await fetch(`${apiUrl}/api/settings/currency`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
