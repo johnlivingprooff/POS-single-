@@ -1,13 +1,9 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
-interface ImportMetaEnv {
-  VITE_API_URL?: string;
-}
-
-interface ImportMeta {
-  env: ImportMetaEnv;
-}
+// Debug: Log the API URL being used
+console.log('🔗 API Base URL:', import.meta.env.VITE_API_URL || '/api');
+console.log('🌍 Environment:', import.meta.env.MODE);
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
