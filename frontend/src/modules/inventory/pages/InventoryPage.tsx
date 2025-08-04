@@ -67,9 +67,7 @@ const InventoryPage: React.FC = () => {
   } = useQuery({
     queryKey: ['inventoryProducts'],
     queryFn: async () => {
-      const res = await fetch(`/api/products?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/products?limit=100`, token);
       if (!res.ok) throw new Error('Failed to fetch products');
       return res.json();
     }
@@ -171,11 +169,10 @@ const InventoryPage: React.FC = () => {
   const handleEditProduct = async (data: any) => {
     setEditProductLoading(true);
     try {
-      const res = await fetch(`/api/products/${editProduct.id}`, {
+      const res = await apiFetch(`/products/${editProduct.id}`, token, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
       });
@@ -196,9 +193,8 @@ const InventoryPage: React.FC = () => {
   const handleDeleteProduct = async (productId: string) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      const res = await fetch(`/api/products/${productId}`, {
+      const res = await apiFetch(`/products/${productId}`, token, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
       });
       if (res.status === 204) {
         showToast('Product deleted successfully!','success');
@@ -219,9 +215,8 @@ const InventoryPage: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this finished good and its BOM?')) return;
     try {
       // Delete BOM
-      const res = await fetch(`/api/manufacturing/bom/${bom.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`/api/manufacturing/bom/${bom.id}`, token, {
+        method: 'DELETE'
       });
       if (!res.ok) {
         const error = await res.json();
@@ -230,9 +225,8 @@ const InventoryPage: React.FC = () => {
       }
       // Delete finished good product
       if (bom.productId) {
-        const res2 = await fetch(`/api/products/${bom.productId}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
+        const res2 = await apiFetch(`/api/products/${bom.productId}`, token, {
+          method: 'DELETE'
         });
         if (res2.status !== 204) {
           const error = await res2.json();
@@ -716,8 +710,8 @@ export function ManufactureModalContent({
   React.useEffect(() => {
     if (!selectedBOM) return setPriceDetails(null);
     setLoadingPrice(true);
-    fetch(`/api/manufacturing/bom/${selectedBOM.id}/price`, {
-      headers: { Authorization: `Bearer ${token}` }
+    apiFetch(`/api/manufacturing/bom/${selectedBOM.id}/price`, token, {
+      method: 'GET'
     })
       .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch price details'))
       .then(data => setPriceDetails(data.priceDetails))
