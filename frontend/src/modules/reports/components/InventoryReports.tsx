@@ -34,6 +34,7 @@ import DatePicker from 'react-datepicker';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
+import { apiFetch } from '../../../lib/api-utils';
 import 'react-datepicker/dist/react-datepicker.css';
 
 interface DateRange {
@@ -84,9 +85,7 @@ const InventoryReports: React.FC = () => {
       if (filters.stockType) params.append('stockType', filters.stockType);
       if (filters.userId) params.append('userId', filters.userId);
 
-      const res = await fetch(`/api/reports/inventory?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/reports/inventory?${params.toString()}`, token);
       if (!res.ok) throw new Error('Failed to fetch inventory reports');
       return res.json();
     }
@@ -96,9 +95,7 @@ const InventoryReports: React.FC = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/categories', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/categories', token);
       if (!res.ok) throw new Error('Failed to fetch categories');
       return res.json();
     }
