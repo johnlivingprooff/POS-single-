@@ -98,9 +98,7 @@ const SalesReportsPage: React.FC = () => {
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/products/categories', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/products/categories', token); 
       if (!res.ok) throw new Error('Failed to fetch categories');
       return res.json();
     }
@@ -110,9 +108,7 @@ const SalesReportsPage: React.FC = () => {
   const { data: customersData } = useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
-      const res = await fetch('/api/customers?limit=100', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/customers?limit=100', token);
       if (!res.ok) throw new Error('Failed to fetch customers');
       return res.json();
     }

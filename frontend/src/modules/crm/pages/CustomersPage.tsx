@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 
 const CustomersPage: React.FC = () => {
   const { token } = useAuthStore();
@@ -11,9 +12,7 @@ const CustomersPage: React.FC = () => {
   } = useQuery({
     queryKey: ['crmCustomers'],
     queryFn: async () => {
-      const res = await fetch(`/api/customers?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/customers?limit=100`, token);
       if (!res.ok) throw new Error('Failed to fetch customers');
       return res.json();
     }
