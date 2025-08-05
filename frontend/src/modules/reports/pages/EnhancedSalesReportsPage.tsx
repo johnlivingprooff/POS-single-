@@ -36,6 +36,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
 import 'react-datepicker/dist/react-datepicker.css';
+import { apiFetch } from '../../../lib/api-utils';
 
 interface DateRange {
   start: Date | null;
@@ -87,9 +88,7 @@ const SalesReportsPage: React.FC = () => {
       if (filters.paymentMethod) params.append('paymentMethod', filters.paymentMethod);
       if (filters.productId) params.append('productId', filters.productId);
 
-      const res = await fetch(`/api/reports/sales/analytics?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/reports/sales/analytics?${params.toString()}`, token);
       if (!res.ok) throw new Error('Failed to fetch sales analytics');
       return res.json();
     }
@@ -218,10 +217,8 @@ const SalesReportsPage: React.FC = () => {
         params.append('endDate', filters.dateRange.end.toISOString());
       }
 
-      const res = await fetch(`/api/reports/sales/export/excel?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const res = await apiFetch(`/reports/sales/export/excel?${params.toString()}`, token);
+
       if (!res.ok) throw new Error('Failed to fetch export data');
       const data = await res.json();
 
