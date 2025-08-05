@@ -5,6 +5,7 @@ import { Eye, Printer, Edit } from 'lucide-react';
 import { generateReceiptPDF } from '../../../components/ReceiptPDF';
 import SaleViewModal from '../../../components/SaleViewModal';
 import SaleEditModal from '../../../components/SaleEditModal';
+import { apiFetch } from '../../../lib/api-utils';
 import { useAppToast } from '../../../hooks/useAppToast';
 import TableSkeleton from '../../../components/TableSkeleton';
 
@@ -17,11 +18,10 @@ const SalesPage: React.FC = () => {
   const handleEditSave = async (updatedSale: any) => {
     setEditLoading(true);
     try {
-      const res = await fetch(`/api/sales/${updatedSale.id}`, {
+      const res = await apiFetch(`/sales/${updatedSale.id}`, token, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(updatedSale)
       });
@@ -42,9 +42,7 @@ const SalesPage: React.FC = () => {
   } = useQuery({
     queryKey: ['salesRecords'],
     queryFn: async () => {
-      const res = await fetch(`/api/sales?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/sales?limit=100`, token);
       if (!res.ok) throw new Error('Failed to fetch sales records');
       return res.json();
     }

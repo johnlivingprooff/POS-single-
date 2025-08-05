@@ -53,10 +53,6 @@ const InventoryPage: React.FC = () => {
   const [selectedBOM, setSelectedBOM] = useState<any>(null);
   const [bomError, setBomError] = useState('');
   const { token } = useAuthStore();
-  
-
-  // ...existing code...
-
 
   // Fetch products from backend (declare only once)
   const {
@@ -67,15 +63,19 @@ const InventoryPage: React.FC = () => {
   } = useQuery({
     queryKey: ['inventoryProducts'],
     queryFn: async () => {
+      if (!token) throw new Error('No authentication token');
       const res = await apiFetch(`/products?limit=100`, token);
       if (!res.ok) throw new Error('Failed to fetch products');
       return res.json();
-    }
+    },
+    enabled: !!token
   });
   const products: Product[] = productsData?.products || [];
 
   // Fetch BOMs for finished goods on page load and whenever products change
   useEffect(() => {
+    if (!token) return;
+    
     (async () => {
       try {
         const res = await apiFetch('/manufacturing/bom', token);
@@ -215,7 +215,7 @@ const InventoryPage: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this finished good and its BOM?')) return;
     try {
       // Delete BOM
-      const res = await apiFetch(`/api/manufacturing/bom/${bom.id}`, token, {
+      const res = await apiFetch(`/manufacturing/bom/${bom.id}`, token, {
         method: 'DELETE'
       });
       if (!res.ok) {
@@ -225,7 +225,7 @@ const InventoryPage: React.FC = () => {
       }
       // Delete finished good product
       if (bom.productId) {
-        const res2 = await apiFetch(`/api/products/${bom.productId}`, token, {
+        const res2 = await apiFetch(`/products/${bom.productId}`, token, {
           method: 'DELETE'
         });
         if (res2.status !== 204) {
@@ -710,7 +710,7 @@ export function ManufactureModalContent({
   React.useEffect(() => {
     if (!selectedBOM) return setPriceDetails(null);
     setLoadingPrice(true);
-    apiFetch(`/api/manufacturing/bom/${selectedBOM.id}/price`, token, {
+    apiFetch(`/manufacturing/bom/${selectedBOM.id}/price`, token, {
       method: 'GET'
     })
       .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch price details'))
