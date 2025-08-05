@@ -9,11 +9,9 @@ import { Search, Package, Plus, Edit, Trash2 } from 'lucide-react';
 // Removed FinishedGoodForm; finished good fields will be inlined below
 // Fetch products for finished goods/raw materials
 function fetchProducts(token: any, stockType?: string) {
-  let url = '/api/products?limit=100';
+  let url = `/products?limit=100`;
   if (stockType) url += `&stockType=${stockType}`;
-  return fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  }).then(res => {
+  return apiFetch(url, token).then(res => {
     if (!res.ok) throw new Error('Failed to fetch products');
     return res.json();
   });
@@ -31,6 +29,32 @@ function fetchBOMs(token: any) {
 
 export default function BOMTable() {
   const { showToast } = useAppToast();
+  const token = useAuthStore(state => state.token);
+  const [currency, setCurrency] = useState('$'); // Default to $ symbol
+
+  // Fetch currency setting
+  const { data: currencyData } = useQuery(['currency', token], async () => {
+    if (!token) return null;
+    const res = await apiFetch('/settings/currency', token);
+    if (!res.ok) throw new Error('Failed to fetch currency');
+    return res.json();
+  }, {
+    enabled: !!token,
+    onSuccess: (data) => {
+      if (data?.currency) {
+        // Map currency codes to symbols
+        const currencySymbols: Record<string, string> = {
+          'USD': '$',
+          'EUR': '€',
+          'GBP': '£',
+          'JPY': '¥',
+          'CNY': '¥',
+          'INR': '₹'
+        };
+        setCurrency(currencySymbols[data.currency] || data.currency);
+      }
+    }
+  });
   // Real-time price calculation for BOM modal (client-side, for preview only)
   function getLivePriceDetails() {
     if (!form.components.length) return null;
@@ -57,7 +81,7 @@ export default function BOMTable() {
     price = Math.round(price * 100) / 100;
     return { costPrice, price, priceFormula, costBreakdown };
   }
-  const token = useAuthStore(state => state.token);
+  // const token = useAuthStore(state => state.token);
   const { data, isLoading, error, refetch } = useQuery(['manufacturingBOMs', token], () => fetchBOMs(token));
 
   // Modal state
@@ -172,9 +196,7 @@ export default function BOMTable() {
     setShowModal(true);
     setFormError('');
     // Fetch price details for this BOM
-    fetch(`/api/manufacturing/bom/${bom.id}/price`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiFetch(`/manufacturing/bom/${bom.id}/price`, token)
       .then(res => res.json())
       .then(data => setPriceDetails(data.priceDetails || null))
       .catch(() => setPriceDetails(null));
@@ -284,9 +306,8 @@ export default function BOMTable() {
                     onClick={async () => {
                       if (!window.confirm('Are you sure you want to delete this BOM?')) return;
                       try {
-                        const res = await fetch(`/api/manufacturing/bom/${bom.id}`, {
-                          method: 'DELETE',
-                          headers: { Authorization: `Bearer ${token}` }
+                        const res = await apiFetch(`/manufacturing/bom/${bom.id}`, token, {
+                          method: 'DELETE'
                         });
                         if (!res.ok) throw new Error('Failed to delete BOM');
                         showToast('BOM deleted successfully!','success');
@@ -402,13 +423,13 @@ export default function BOMTable() {
             return (
               <div className="p-3 mb-2 border rounded bg-gray-50">
                 <div className="mb-1 font-semibold">Price Calculation (Preview):</div>
-                <div className="mb-1 text-sm">Cost Price: <b>${live.costPrice.toFixed(2)}</b></div>
+                <div className="mb-1 text-sm">Cost Price: <b>{currency}{live.costPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div>
                 <div className="mb-1 text-sm">Formula: <span className="font-mono">{live.priceFormula}</span></div>
-                <div className="mb-1 text-sm">Final Price: <b>${live.price.toFixed(2)}</b></div>
+                <div className="mb-1 text-sm">Final Price: <b>{currency}{live.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div>
                 <div className="mb-1 text-sm">Breakdown:</div>
                 <ul className="pl-4 text-xs list-disc">
                   {live.costBreakdown.map((item: any, idx: number) => (
-                    <li key={idx}>{item.name} ({item.sku}): {item.quantity} × ${item.unitCost} = ${item.total.toFixed(2)}</li>
+                    <li key={idx}>{item.name} ({item.sku}): {item.quantity} × {currency}{item.unitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} = {currency}{item.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</li>
                   ))}
                 </ul>
               </div>
@@ -418,20 +439,20 @@ export default function BOMTable() {
           {showModal && modalMode === 'edit' && priceDetails && priceDetails.costBreakdown.length > 0 && (
             <div className="p-3 mb-2 border rounded bg-gray-50">
               <div className="mb-1 font-semibold">Price Calculation:</div>
-              <div className="mb-1 text-sm">Cost Price: <b>${priceDetails.unitCost.toFixed(2)}</b></div>
+              <div className="mb-1 text-sm">Cost Price: <b>{currency}{priceDetails.unitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div>
               <div className="mb-1 text-sm">Formula: <span className="font-mono">{priceDetails.priceFormula}</span></div>
-              <div className="mb-1 text-sm">Final Price: <b>${priceDetails.price.toFixed(2)}</b></div>
+              <div className="mb-1 text-sm">Final Price: <b>{currency}{priceDetails.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></div>
               <div className="mb-1 text-sm">Breakdown:</div>
               <ul className="pl-4 text-xs list-disc">
                 {priceDetails.costBreakdown.map((item: any, idx: number) => (
                   <li key={idx}>
-                    {item.name} ({item.sku}): {item.quantity} × $
+                    {item.name} ({item.sku}): {item.quantity} × {currency}
                     {typeof item.unitCost !== 'undefined' ? (
-                      <>{item.unitCost}</>
+                      <>{item.unitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</>
                     ) : (
                       <span className="font-semibold text-red-600">MISSING UNIT COST</span>
                     )}
-                    {' '}= ${item.total.toFixed(2)}
+                    {' '}= {currency}{item.total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </li>
                 ))}
               </ul>

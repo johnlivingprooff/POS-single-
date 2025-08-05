@@ -37,6 +37,7 @@ const POSPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [otherPayment, setOtherPayment] = useState('');
   const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [currency, setCurrency] = useState('$'); // Default to $ symbol
   const [taxSettings, setTaxSettings] = useState<TaxSettings>({
     taxEnabled: false,
     taxType: 'exclusive',
@@ -63,6 +64,31 @@ const POSPage: React.FC = () => {
       setTaxSettings(taxData);
     }
   }, [taxData]);
+
+  
+    // Fetch currency setting
+    const { data: currencyData } = useQuery(['currency', token], async () => {
+      if (!token) return null;
+      const res = await apiFetch('/settings/currency', token);
+      if (!res.ok) throw new Error('Failed to fetch currency');
+      return res.json();
+    }, {
+      enabled: !!token,
+      onSuccess: (data) => {
+        if (data?.currency) {
+          // Map currency codes to symbols
+          const currencySymbols: Record<string, string> = {
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'JPY': '¥',
+            'CNY': '¥',
+            'INR': '₹'
+          };
+          setCurrency(currencySymbols[data.currency] || data.currency);
+        }
+      }
+    });
 
   // Fetch customers for dropdown
   const {
@@ -93,11 +119,18 @@ const POSPage: React.FC = () => {
     }
   });
 
-  // Only show finished goods for POS
+  // Filter state and search
   const [searchTerm, setSearchTerm] = useState('');
-  // Only show products that are finished goods for POS
+  const [activeFilter, setActiveFilter] = useState<'all' | 'finished_good' | 'raw_material'>('finished_good');
+  
+  // Filter products based on active filter and search term
   const displayedProducts = (productsData?.products || [])
-    .filter((p: any) => p.stockType === 'finished_good')
+    .filter((p: any) => {
+      if (activeFilter === 'all') {
+        return p.stockType === 'finished_good' || p.stockType === 'raw_material';
+      }
+      return p.stockType === activeFilter;
+    })
     .filter((p: any) => {
       if (!searchTerm.trim()) return true;
       const term = searchTerm.trim().toLowerCase();
@@ -286,8 +319,8 @@ const POSPage: React.FC = () => {
         discount: getDiscountAmount(),
         total: getTotal(),
         paymentMethod: paymentMethod === 'other' ? otherPayment : paymentMethod,
-        currency: 'USD', // This should come from organization settings
-        currencySymbol: '$'
+        currency: currencyData?.currency || 'USD', // Use actual currency from settings
+        currencySymbol: currency
       };
       
       // Download receipt as centered, printable HTML
@@ -335,11 +368,38 @@ const POSPage: React.FC = () => {
             </button>
           </form>
         </div>
-        {/* Only show Finished Goods pill as static label */}
+        {/* Filter Pills */}
         <div className="flex gap-2 mb-4">
-          <span className="px-4 py-1 text-sm font-medium text-white border rounded-full cursor-default select-none bg-primary border-primary">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
+              activeFilter === 'all'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            All Products
+          </button>
+          <button
+            onClick={() => setActiveFilter('finished_good')}
+            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
+              activeFilter === 'finished_good'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
             Finished Goods
-          </span>
+          </button>
+          <button
+            onClick={() => setActiveFilter('raw_material')}
+            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
+              activeFilter === 'raw_material'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            Raw Materials
+          </button>
         </div>
         {/* Product Grid */}
         {productsLoading ? (
@@ -363,7 +423,7 @@ const POSPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900">{product.name}</h3>
                 <p className="mb-2 text-sm text-gray-600">SKU: {product.sku}</p>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-lg font-bold text-primary">${Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-primary">{currency}{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-sm font-medium text-gray-500">
                     {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
                   </p>
@@ -428,7 +488,7 @@ const POSPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900">{item.name}</h3>
                 <p className="text-sm text-gray-600">SKU: {item.sku}</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-lg font-bold text-primary">${Number(item.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-primary">{currency}{Number(item.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-gray-500">{currentStock} available</p>
                 </div>
                 
@@ -464,7 +524,7 @@ const POSPage: React.FC = () => {
                 
                 <div className="mt-2 text-right">
                   <p className="font-bold">
-                    Subtotal: ${(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    Subtotal: {currency}{(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   {isAtMaxQuantity && (
                     <p className="mt-1 text-xs text-amber-600">Maximum stock reached</p>
@@ -501,27 +561,27 @@ const POSPage: React.FC = () => {
             <div className="p-4 space-y-2 bg-gray-50 rounded-lg">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
-                <span>${getSubtotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span>{currency}{getSubtotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-sm text-red-600">
                   <span>Discount ({discountPercentage}%):</span>
-                  <span>-${getDiscountAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>-{currency}{getDiscountAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               
               {taxSettings.taxEnabled && (
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{taxSettings.taxName} ({taxSettings.taxPercentage}% {taxSettings.taxType}):</span>
-                  <span>{taxSettings.taxType === 'inclusive' ? 'included' : `$${getTaxAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
+                  <span>{taxSettings.taxType === 'inclusive' ? 'included' : `${currency}${getTaxAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
                 </div>
               )}
               
               <div className="pt-2 border-t border-gray-300">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>${getTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span>{currency}{getTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               </div>
             </div>

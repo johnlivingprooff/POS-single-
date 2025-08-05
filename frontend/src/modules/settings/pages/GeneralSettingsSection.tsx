@@ -55,7 +55,7 @@ export default function GeneralSettingsSection() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-6">
-      {/* Unit of Measurement */}
+      {/* Unit of Measurement
       <div>
         <label className="block mb-1 font-medium">Unit of Measurement</label>
         <select {...register('unitOfMeasurement', {
@@ -67,7 +67,7 @@ export default function GeneralSettingsSection() {
           ))}
         </select>
         {errors.unitOfMeasurement && <span className="text-sm text-red-500">{String(errors.unitOfMeasurement.message)}</span>}
-      </div>
+      </div> */}
       {/* Currency */}
       <div className="col-span-2">
         <CurrencySettings />

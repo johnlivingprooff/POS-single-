@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Button } from '../../../components/ui/button';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
 import { useAuthStore } from '../../../stores/authStore';
+import { apiFetch } from '../../../lib/api-utils';
 
 interface Currency {
   code: string;
@@ -25,12 +26,8 @@ const CurrencySettings: React.FC = () => {
 
   const fetchCurrencySettings = async () => {
     try {
-      const apiUrl = process.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/settings/currency`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // const apiUrl = process.env.VITE_API_URL || '';
+      const response = await apiFetch(`/settings/currency`, token);
       const data = await response.json();
       setCurrentCurrency(data.currency);
     } catch (error) {
@@ -40,12 +37,8 @@ const CurrencySettings: React.FC = () => {
 
   const fetchAvailableCurrencies = async () => {
     try {
-      const apiUrl = process.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/settings/currencies`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // const apiUrl = process.env.VITE_API_URL || '';
+      const response = await apiFetch(`/settings/currencies`, token);
       const data = await response.json();
       setAvailableCurrencies(data);
     } catch (error) {
@@ -56,12 +49,10 @@ const CurrencySettings: React.FC = () => {
   const updateCurrency = async (newCurrency: string) => {
     try {
       setLoading(true);
-      const apiUrl = process.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/settings/currency`, {
+      const response = await apiFetch(`/settings/currency`, token, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ currency: newCurrency }),
       });
@@ -83,13 +74,17 @@ const CurrencySettings: React.FC = () => {
     }
   };
 
-  // Group currencies by region
+  // Group currencies by region and deduplicate
   const groupedCurrencies = availableCurrencies.reduce((groups, currency) => {
     const region = currency.region;
     if (!groups[region]) {
       groups[region] = [];
     }
-    groups[region].push(currency);
+    // Check if currency already exists in this region to prevent duplicates
+    const exists = groups[region].some(existing => existing.code === currency.code);
+    if (!exists) {
+      groups[region].push(currency);
+    }
     return groups;
   }, {} as Record<string, Currency[]>);
 
@@ -118,9 +113,9 @@ const CurrencySettings: React.FC = () => {
               <div key={region}>
                 <h4 className="mb-2 text-sm font-medium text-gray-700">{region}</h4>
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                  {currencies.map((currency) => (
+                  {currencies.map((currency, index) => (
                     <button
-                      key={currency.code}
+                      key={`${region}-${currency.code}-${index}`}
                       onClick={() => updateCurrency(currency.code)}
                       disabled={loading || currency.code === currentCurrency}
                       className={`p-3 text-left border rounded-md transition-colors ${
