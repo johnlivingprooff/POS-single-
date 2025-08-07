@@ -36,7 +36,7 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
       return totalAccounted > 0 && totalAccounted <= originalItem.quantityOut;
     });
 
-    if (validItems.length === 0) {
+    if (validItems.length < 0) {
       alert('Please specify return quantities for at least one item');
       return;
     }
@@ -74,24 +74,24 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
         
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
         
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
+        <div className="inline-block px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
           <div className="absolute top-0 right-0 pt-4 pr-4">
             <button
               type="button"
-              className="bg-white rounded-md text-gray-400 hover:text-gray-600"
+              className="text-gray-400 bg-white rounded-md hover:text-gray-600"
               onClick={onCancel}
             >
-              <XIcon className="h-6 w-6" />
+              <XIcon className="w-6 h-6" />
             </button>
           </div>
           
           <div className="sm:flex sm:items-start">
-            <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <div className="w-full mt-3 text-center sm:mt-0 sm:text-left">
+              <h3 className="mb-4 text-lg font-medium leading-6 text-gray-900">
                 Process Return - {requisition.destination}
               </h3>
               
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="p-3 mb-4 rounded-lg bg-gray-50">
                 <p className="text-sm text-gray-600">
                   <strong>Requested by:</strong> {requisition.requester.name}
                 </p>
@@ -108,19 +108,19 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Items */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
                     Return Details for Each Item
                   </label>
                   
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-3 overflow-y-auto max-h-96">
                     {items.map((item, index) => {
                       const originalQty = getOriginalQuantity(item.productId);
                       const totalAccounted = getTotalAccounted(item);
                       const remaining = originalQty - totalAccounted;
                       
                       return (
-                        <div key={index} className="border border-gray-200 rounded-lg p-3">
-                          <div className="flex justify-between items-center mb-2">
+                        <div key={index} className="p-3 border border-gray-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium text-gray-900">
                               {getProductName(item.productId)}
                             </h4>
@@ -131,7 +131,7 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
                           
                           <div className="grid grid-cols-3 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                              <label className="block mb-1 text-xs font-medium text-gray-700">
                                 Returned (Good)
                               </label>
                               <input
@@ -145,7 +145,7 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
                             </div>
                             
                             <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                              <label className="block mb-1 text-xs font-medium text-gray-700">
                                 Damaged
                               </label>
                               <input
@@ -159,8 +159,8 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
                             </div>
                             
                             <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
-                                Lost/Sold
+                              <label className="block mb-1 text-xs font-medium text-gray-700">
+                                Lost
                               </label>
                               <input
                                 type="number"
@@ -188,7 +188,7 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
                     Notes (Optional)
                   </label>
                   <textarea
@@ -212,7 +212,7 @@ const ReturnForm: React.FC<ReturnFormProps> = ({ requisition, onSubmit, onCancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-primary-dark disabled:opacity-50"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md bg-primary hover:bg-primary-dark disabled:opacity-50"
                     disabled={loading}
                   >
                     {loading ? 'Processing...' : 'Process Return'}

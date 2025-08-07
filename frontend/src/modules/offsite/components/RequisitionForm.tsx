@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { XIcon, PlusIcon, MinusIcon } from 'lucide-react';
+import { apiFetch } from '../../../lib/api-utils';
 
 interface RequisitionFormProps {
   onSubmit: (data: any) => void;
@@ -24,9 +25,7 @@ const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCancel, l
   const { data: products, isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const res = await fetch('/api/products', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/products', token);
       if (!res.ok) throw new Error('Failed to fetch products');
       return res.json();
     }
@@ -139,59 +138,60 @@ const RequisitionForm: React.FC<RequisitionFormProps> = ({ onSubmit, onCancel, l
                 {/* Items */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Items to Take Out *
-                    </label>
-                    <button
-                      type="button"
-                      onClick={addItem}
-                      className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200"
-                    >
-                      <PlusIcon className="w-3 h-3 mr-1" />
-                      Add Item
-                    </button>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Items to Take Out *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded hover:bg-blue-200"
+                  >
+                    <PlusIcon className="w-3 h-3 mr-1" />
+                    Add Item
+                  </button>
                   </div>
                   
                   <div className="space-y-2 overflow-y-auto max-h-60">
-                    {items.map((item, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <select
-                          value={item.productId}
-                          onChange={(e) => updateItem(index, 'productId', e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          required
-                        >
-                          <option value="">
-                            {productsLoading ? 'Loading products...' : 'Select Product'}
-                          </option>
-                          {products?.products?.map((product: any) => (
-                            <option key={product.id} value={product.id}>
-                              {product.name} ({product.sku}) - Stock: {product.stock}
-                            </option>
-                          ))}
-                        </select>
-                        
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantityOut}
-                          onChange={(e) => updateItem(index, 'quantityOut', parseInt(e.target.value) || 1)}
-                          className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Qty"
-                          required
-                        />
-                        
-                        {items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                            className="p-2 text-red-600 hover:text-red-800"
-                          >
-                            <MinusIcon className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                  {items.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                    <select
+                      value={item.productId}
+                      onChange={(e) => updateItem(index, 'productId', e.target.value)}
+                      className="flex-1 min-w-[220px] max-w-[320px] w-[260px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary truncate"
+                      required
+                      style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}
+                    >
+                      <option value="">
+                      {productsLoading ? 'Loading products...' : 'Select Product'}
+                      </option>
+                      {products?.products?.map((product: any) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name} ({product.sku}) - Stock: {product.stock}
+                      </option>
+                      ))}
+                    </select>
+                    
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantityOut}
+                      onChange={(e) => updateItem(index, 'quantityOut', parseInt(e.target.value) || 1)}
+                      className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Qty"
+                      required
+                    />
+                    
+                    {items.length > 1 && (
+                      <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="p-2 text-red-600 hover:text-red-800"
+                      >
+                      <MinusIcon className="w-4 h-4" />
+                      </button>
+                    )}
+                    </div>
+                  ))}
                   </div>
                 </div>
 

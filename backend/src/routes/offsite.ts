@@ -2,6 +2,12 @@ import express, { Response } from 'express';
 import { AuthRequest } from '../types/authRequest';
 import { authenticate } from '../middleware/auth';
 import prisma from '../lib/prisma';
+import { 
+  triggerRequisitionCreated, 
+  triggerRequisitionApproved, 
+  triggerRequisitionRejected, 
+  triggerRequisitionReturned 
+} from '../lib/notifications';
 
 const router = express.Router();
 
@@ -142,6 +148,23 @@ router.post('/requisitions', authenticate, async (req: AuthRequest, res) => {
         }
       }
     });
+
+    console.log('=== Requisition Created ===');
+    console.log('Requisition ID:', requisition.id);
+
+    // Trigger notification for new requisition
+    try {
+      await triggerRequisitionCreated(
+        requisition.id, 
+        verifiedRequesterId, 
+        destination, 
+        items.length
+      );
+      console.log('=== Notification Triggered ===');
+    } catch (notificationError) {
+      console.error('Error triggering requisition created notification:', notificationError);
+      // Don't fail the request if notification fails
+    }
 
     // If auto-approved (for now, we'll implement approval workflow later)
     // Update stock levels
@@ -286,11 +309,37 @@ router.post('/requisitions/:id/returns', authenticate, async (req: AuthRequest, 
       item.quantityReturned + item.quantityLost >= item.quantityOut
     );
 
+    let updatedRequisition = null;
     if (allReturned) {
-      await prisma.offSiteRequisition.update({
+      updatedRequisition = await prisma.offSiteRequisition.update({
         where: { id: requisitionId },
-        data: { status: 'returned' }
+        data: { status: 'returned' },
+        include: {
+          requester: { select: { id: true, name: true, email: true } }
+        }
       });
+    } else {
+      updatedRequisition = await prisma.offSiteRequisition.findUnique({
+        where: { id: requisitionId },
+        include: {
+          requester: { select: { id: true, name: true, email: true } }
+        }
+      });
+    }
+
+    // Trigger notification for return processed
+    try {
+      if (updatedRequisition) {
+        await triggerRequisitionReturned(
+          requisitionId,
+          updatedRequisition.requesterId,
+          updatedRequisition.destination,
+          items.length
+        );
+      }
+    } catch (notificationError) {
+      console.error('Error triggering requisition returned notification:', notificationError);
+      // Don't fail the request if notification fails
     }
 
     res.status(201).json(returnRecord);
@@ -355,6 +404,19 @@ router.patch('/requisitions/:id/approve', authenticate, async (req: AuthRequest,
       }
     });
 
+    // Trigger notification for approved requisition
+    try {
+      await triggerRequisitionApproved(
+        requisition.id,
+        requisition.requesterId,
+        approverId,
+        requisition.destination
+      );
+    } catch (notificationError) {
+      console.error('Error triggering requisition approved notification:', notificationError);
+      // Don't fail the request if notification fails
+    }
+
     return res.json(requisition);
   } catch (error: any) {
     console.error('Error approving requisition:', error);
@@ -397,6 +459,19 @@ router.patch('/requisitions/:id/reject', authenticate, async (req: AuthRequest, 
         }
       }
     });
+
+    // Trigger notification for rejected requisition
+    try {
+      await triggerRequisitionRejected(
+        requisition.id,
+        requisition.requesterId,
+        approverId,
+        requisition.destination
+      );
+    } catch (notificationError) {
+      console.error('Error triggering requisition rejected notification:', notificationError);
+      // Don't fail the request if notification fails
+    }
 
     return res.json(requisition);
   } catch (error: any) {
