@@ -121,7 +121,7 @@ const POSPage: React.FC = () => {
 
   // Filter state and search
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'finished_good' | 'raw_material'>('finished_good');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'finished_good' | 'raw_material'>('all');
   
   // Filter products based on active filter and search term
   const displayedProducts = (productsData?.products || [])
@@ -340,9 +340,9 @@ const POSPage: React.FC = () => {
           <form onSubmit={handleBarcodeScan} className="flex space-x-4">
             <div className="flex-1">
               <label htmlFor="barcode" className="block mb-2 text-sm font-medium text-gray-700">
-                Scan Barcode or Enter SKU / Search by Name
+                Search Product by Name
               </label>
-              <input
+              {/* <input
                 id="barcode"
                 type="text"
                 value={barcode}
@@ -350,7 +350,7 @@ const POSPage: React.FC = () => {
                 className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
                 placeholder="Scan or type product code"
                 autoFocus
-              />
+              /> */}
               <input
                 type="text"
                 value={searchTerm}
@@ -359,13 +359,13 @@ const POSPage: React.FC = () => {
                 placeholder="Search by product name or SKU"
               />
             </div>
-            <button
+            {/* <button
               type="submit"
               className="flex items-center px-4 py-2 transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
             >
               <Scan className="w-4 h-4 mr-2" />
               Add
-            </button>
+            </button> */}
           </form>
         </div>
         {/* Filter Pills */}
@@ -380,7 +380,7 @@ const POSPage: React.FC = () => {
           >
             All Products
           </button>
-          <button
+          {/* <button
             onClick={() => setActiveFilter('finished_good')}
             className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
               activeFilter === 'finished_good'
@@ -399,7 +399,7 @@ const POSPage: React.FC = () => {
             }`}
           >
             Raw Materials
-          </button>
+          </button> */}
         </div>
         {/* Product Grid */}
         {productsLoading ? (
@@ -558,7 +558,7 @@ const POSPage: React.FC = () => {
             </div>
 
             {/* Order Summary */}
-            <div className="p-4 space-y-2 bg-gray-50 rounded-lg">
+            <div className="p-4 space-y-2 rounded-lg bg-gray-50">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
                 <span>{currency}{getSubtotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -579,7 +579,7 @@ const POSPage: React.FC = () => {
               )}
               
               <div className="pt-2 border-t border-gray-300">
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
                   <span>{currency}{getTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>

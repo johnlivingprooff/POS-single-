@@ -18,17 +18,17 @@ model User {
   role           String   @default("employee")
   permissions    String[]
   isActive       Boolean  @default(true)
-  organizationId String?  // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   // Relations
-  organization           Organization? @relation(fields: [organizationId], references: [id])
-  sales                  Sale[]
-  sessions               UserSession[]
-  notifications          Notification[] @relation("UserNotifications")
-  notificationSettings   NotificationSettings? @relation("UserNotificationSettings")
-  requisitions           OffSiteRequisition[] @relation("UserRequisitions")
+  organization         Organization?         @relation(fields: [organizationId], references: [id])
+  sales                Sale[]
+  sessions             UserSession[]
+  notifications        Notification[]        @relation("UserNotifications")
+  notificationSettings NotificationSettings? @relation("UserNotificationSettings")
+  requisitions         OffSiteRequisition[]  @relation("UserRequisitions")
 
   @@map("users")
 }
@@ -51,7 +51,7 @@ model Category {
   name           String
   description    String?
   isActive       Boolean  @default(true)
-  organizationId String?  // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -71,40 +71,54 @@ model Supplier {
   phone          String?
   address        String?
   isActive       Boolean  @default(true)
-  organizationId String?  // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   // Relations
   products       Product[]
   purchaseOrders PurchaseOrder[] @relation("SupplierPurchaseOrders")
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization?   @relation(fields: [organizationId], references: [id])
 
   @@map("suppliers")
 }
 
+// ENUM Values for stockType & assetCategory
+enum StockType {
+  raw_material
+  consumable
+  asset_equipment
+  finished_good
+}
+
+enum AssetCategory {
+  current_asset
+  fixed_asset
+}
+
 model Product {
-  id                  String   @id @default(cuid())
+  id                  String         @id @default(cuid())
   name                String
   sku                 String
   description         String?
-  price               Decimal  @db.Decimal(10, 2)
-  costPrice           Decimal  @db.Decimal(10, 2)
-  unitCost            Decimal  @default(0) @db.Decimal(10, 4) // For raw_material: costPrice/measurementValue; 0 for others
-  stock               Int      @default(0)
-  reorderLevel        Int      @default(0)
-  stockType           String   @default("raw_material") // 'raw_material', 'asset_equipment', or 'finished_good'
+  price               Decimal        @db.Decimal(10, 2)
+  costPrice           Decimal        @db.Decimal(10, 2)
+  unitCost            Decimal        @default(0) @db.Decimal(10, 4) // For raw_material: costPrice/measurementValue; 0 for others
+  stock               Int            @default(0)
+  reorderLevel        Int            @default(0)
+  stockType           StockType      @default(raw_material) // 'raw_material', 'asset_equipment', or 'finished_good'
+  assetCategory       AssetCategory? // 'current_asset' or 'fixed_asset'; only for asset_equipment
   measurementType     String? // e.g. 'grams', 'kg', 'liters', 'units', etc. Only for raw_material
   measurementValue    Int? // e.g. 500 (grams), 2 (liters), etc. Only for raw_material
-  availableQuantities Int      @default(0) // For raw_material: stock * measurementValue; 0 for others
+  availableQuantities Int            @default(0) // For raw_material: stock * measurementValue; 0 for others
   categoryId          String?
   supplierId          String?
-  organizationId      String?  // Multi-tenant support
-  pricingMethod       String?  @default("markup") // 'markup', 'margin', 'fixed'
-  pricingOverride     Boolean  @default(false)
-  isActive            Boolean  @default(true)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  organizationId      String? // Multi-tenant support
+  pricingMethod       String?        @default("markup") // 'markup', 'margin', 'fixed'
+  pricingOverride     Boolean        @default(false)
+  isActive            Boolean        @default(true)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 
   // Relations
   category       Category?       @relation(fields: [categoryId], references: [id])
@@ -121,12 +135,11 @@ model Product {
   // Purchase batch relation
   purchaseBatches ProductPurchaseBatch[]
 
-  @@unique([sku, organizationId]) // Ensure unique SKUs per organization
-
   // Off-site inventory relations
   offsiteItems   OffSiteRequisitionItem[] @relation("ProductOffSiteItems")
-  offsiteReturns OffSiteReturnItem[] @relation("ProductOffSiteReturns")
+  offsiteReturns OffSiteReturnItem[]      @relation("ProductOffSiteReturns")
 
+  @@unique([sku, organizationId]) // Ensure unique SKUs per organization
   @@map("products")
 }
 
@@ -139,7 +152,7 @@ model ProductPurchaseBatch {
   costPrice       Decimal  @db.Decimal(10, 2) // Cost per unit
   receivedAt      DateTime @default(now())
   purchaseOrderId String?
-  batchRef       String? // Optional batch reference
+  batchRef        String? // Optional batch reference
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -169,7 +182,7 @@ model Customer {
   address        String?
   loyaltyPoints  Int      @default(0)
   isActive       Boolean  @default(true)
-  organizationId String?  // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -192,7 +205,7 @@ model Sale {
   paymentMethod  String
   status         String   @default("completed") // completed, void, refunded
   notes          String?
-  organizationId String?  // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -255,20 +268,19 @@ model ManufacturingOrder {
   startDate      DateTime?
   endDate        DateTime?
   notes          String?
-  organizationId String?   // Multi-tenant support
+  organizationId String? // Multi-tenant support
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   // Relations
   items        ManufacturingOrderItem[]
-  organization Organization? @relation(fields: [organizationId], references: [id])
+  organization Organization?            @relation(fields: [organizationId], references: [id])
 
   @@unique([orderNumber, organizationId]) // Ensure unique order numbers per organization
   @@map("manufacturing_orders")
 }
 
 model ManufacturingOrderItem {
-
   id        String @id @default(cuid())
   orderId   String
   productId String // raw material/component
@@ -290,7 +302,7 @@ model PurchaseOrder {
   costPrice        Decimal  @db.Decimal(10, 2)
   expectedDelivery DateTime
   status           String   @default("pending") // pending, delivered, cancelled
-  organizationId   String?  // Multi-tenant support
+  organizationId   String? // Multi-tenant support
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -387,16 +399,16 @@ model BOMItem {
 
 // --- Off-Site Inventory Management ---
 model OffSiteRequisition {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   requesterId String
   destination String
   purpose     String?
-  status      String   @default("pending") // pending, approved, dispatched, returned, cancelled
-  requestDate DateTime @default(now())
+  status      String    @default("pending") // pending, approved, dispatched, returned, cancelled
+  requestDate DateTime  @default(now())
   approvedBy  String?
   approvedAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   // Relations
   requester User                     @relation("UserRequisitions", fields: [requesterId], references: [id])
@@ -407,12 +419,12 @@ model OffSiteRequisition {
 }
 
 model OffSiteRequisitionItem {
-  id            String @id @default(cuid())
-  requisitionId String
-  productId     String
-  quantityOut   Int
-  quantityReturned Int @default(0)
-  quantityLost  Int    @default(0)
+  id               String @id @default(cuid())
+  requisitionId    String
+  productId        String
+  quantityOut      Int
+  quantityReturned Int    @default(0)
+  quantityLost     Int    @default(0)
 
   // Relations
   requisition OffSiteRequisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
@@ -429,7 +441,7 @@ model OffSiteReturn {
   createdAt     DateTime @default(now())
 
   // Relations
-  requisition OffSiteRequisition     @relation(fields: [requisitionId], references: [id])
+  requisition OffSiteRequisition  @relation(fields: [requisitionId], references: [id])
   items       OffSiteReturnItem[]
 
   @@map("offsite_returns")
@@ -456,7 +468,7 @@ model Organization {
   id               String   @id @default(cuid())
   name             String
   slug             String   @unique // Used for subdomain routing
-  domain           String?  // Custom domain (optional)
+  domain           String? // Custom domain (optional)
   subscriptionPlan String   @default("trial") // trial, basic, premium, enterprise
   isActive         Boolean  @default(true)
   maxUsers         Int      @default(5)
@@ -464,36 +476,36 @@ model Organization {
   updatedAt        DateTime @updatedAt
 
   // Relations
-  users            User[]
-  subscriptions    Subscription[]
-  featureToggles   FeatureToggle[]
-  settings         OrganizationSettings[]
-  
+  users          User[]
+  subscriptions  Subscription[]
+  featureToggles FeatureToggle[]
+  settings       OrganizationSettings[]
+
   // Multi-tenant data relations
-  categories           Category[]
-  suppliers            Supplier[]
-  products             Product[]
-  customers            Customer[]
-  sales                Sale[]
-  purchaseOrders       PurchaseOrder[]
-  manufacturingOrders  ManufacturingOrder[]
+  categories          Category[]
+  suppliers           Supplier[]
+  products            Product[]
+  customers           Customer[]
+  sales               Sale[]
+  purchaseOrders      PurchaseOrder[]
+  manufacturingOrders ManufacturingOrder[]
 
   @@map("organizations")
 }
 
 model Subscription {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
-  planName       String   // trial, basic, premium, enterprise
-  status         String   // active, cancelled, expired, suspended
+  planName       String // trial, basic, premium, enterprise
+  status         String // active, cancelled, expired, suspended
   startDate      DateTime
   endDate        DateTime?
-  billingCycle   String   // monthly, yearly
-  amount         Decimal  @db.Decimal(10, 2)
-  currency       String   @default("USD")
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  billingCycle   String // monthly, yearly
+  amount         Decimal   @db.Decimal(10, 2)
+  currency       String    @default("USD")
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -504,9 +516,9 @@ model Subscription {
 model FeatureToggle {
   id             String   @id @default(cuid())
   organizationId String
-  featureKey     String   // pos, inventory, manufacturing, offsite, crm, reports, users
+  featureKey     String // pos, inventory, manufacturing, offsite, crm, reports, users
   isEnabled      Boolean  @default(true)
-  limitations    Json?    // JSON object for feature-specific limits
+  limitations    Json? // JSON object for feature-specific limits
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -520,7 +532,7 @@ model FeatureToggle {
 model OrganizationSettings {
   id             String   @id @default(cuid())
   organizationId String
-  key            String   // currency, timezone, language, theme, etc.
+  key            String // currency, timezone, language, theme, etc.
   value          String
   updatedAt      DateTime @updatedAt
 

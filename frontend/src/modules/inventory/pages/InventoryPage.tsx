@@ -22,7 +22,8 @@ interface Product {
   price: number;
   costPrice: number;
   stock: number;
-  stockType: 'raw_material' | 'asset_equipment' | 'finished_good';
+  stockType: 'raw_material' | 'asset_equipment' | 'finished_good' | 'consumable';
+  assetCategory?: string | null;
   category: string | { id: string; name: string; [key: string]: any };
   supplier: string | { id: string; name: string; [key: string]: any };
   reorderLevel: number;
@@ -284,7 +285,7 @@ const InventoryPage: React.FC = () => {
   // const products: Product[] = productsData?.products || [];
 
   const filteredRawMaterials = products.filter(product =>
-    product.stockType === 'raw_material' &&
+    (product.stockType === 'raw_material' || product.stockType === 'consumable') &&
     (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -332,40 +333,40 @@ const InventoryPage: React.FC = () => {
             className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'raw_material' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
             onClick={() => setActiveTab('raw_material')}
           >
-            Raw Materials
+            Stock
           </button>
           <button
             className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'asset_equipment' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
             onClick={() => setActiveTab('asset_equipment')}
           >
-            Assets/Equipment
+            Assets
           </button>
-          <button
+          {/* <button
             className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'finished_goods' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
             onClick={() => setActiveTab('finished_goods')}
           >
             Finished Goods
-          </button>
+          </button> */}
         </div>
         <div className="bg-white rounded-lg shadow p-8 min-h-[500px]">
           {activeTab === 'raw_material' && (
             <>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Raw Materials</h2>
+                <h2 className="text-xl font-semibold text-gray-900">Product</h2>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowAddForm(true)}
                     className="flex items-center px-4 py-2 transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    New Raw Material
+                    New Stock
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => setShowPOForm(true)}
                     className="flex items-center px-4 py-2 text-green-800 transition-colors bg-green-100 rounded-md hover:bg-green-200"
                   >
                     Create Purchase Order
-                  </button>
+                  </button> */}
                 </div>
               </div>
               {/* Table for Raw Materials */}
@@ -376,11 +377,10 @@ const InventoryPage: React.FC = () => {
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">SKU</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Cost Price</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Stock</th>
+                      {/* <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Stock Value</th> */}
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Available Units</th>
                       
-                      {/* Category column removed */}
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Supplier</th>
+                      {/* <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Category</th> */}
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
                     </tr>
                   </thead>
@@ -397,9 +397,9 @@ const InventoryPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.sku}</td>
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                        {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${product.stock <= product.reorderLevel ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{product.stock} packs</span>
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {typeof product.availableQuantities === 'number' && product.measurementType ? (
                             <span>{product.availableQuantities} {product.measurementType}</span>
@@ -409,8 +409,7 @@ const InventoryPage: React.FC = () => {
                         </td>
                         
                        
-                        {/* Category column removed from row */}
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{typeof product.supplier === 'object' && product.supplier !== null ? product.supplier.name : product.supplier}</td>
+                        {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.stockType}</td> */}
                         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                           <div className="flex space-x-2">
                             <button 
@@ -476,7 +475,7 @@ const InventoryPage: React.FC = () => {
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Cost Price</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Stock</th>
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Category</th>
-                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Supplier</th>
+                      {/* <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Supplier</th> */}
                       <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Actions</th>
                     </tr>
                   </thead>
@@ -496,8 +495,8 @@ const InventoryPage: React.FC = () => {
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${product.stock <= product.reorderLevel ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{product.stock} units</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{typeof product.category === 'object' && product.category !== null ? product.category.name : product.category}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{typeof product.supplier === 'object' && product.supplier !== null ? product.supplier.name : product.supplier}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.stockType}</td>
+                        {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{typeof product.supplier === 'object' && product.supplier !== null ? product.supplier.name : product.supplier}</td> */}
                         <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                           <div className="flex space-x-2">
                             <button 
