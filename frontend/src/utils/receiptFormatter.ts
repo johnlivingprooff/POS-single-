@@ -190,7 +190,7 @@ export function generateReceiptHTML(
             <div class="item">
               <div class="item-name">${item.name}</div>
               <div class="item-qty">${item.quantity}x</div>
-              <div class="item-price">${data.currencySymbol}${item.price.toFixed(2)}</div>
+              <div class="item-price">${data.currencySymbol}${Number(item.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               <div class="item-total">${data.currencySymbol}${item.total.toFixed(2)}</div>
             </div>
           `).join('')}
