@@ -36,6 +36,12 @@ const OffsitePage: React.FC = () => {
   const canApprove = user?.role === 'admin' || user?.role === 'manager';
   const canCreateAndEdit = true; // All roles can create and edit their own requisitions
 
+  // Function to check if user can approve a specific requisition
+  const canApproveRequisition = (requisition: any) => {
+    // User must be admin/manager AND not be the one who created the requisition
+    return canApprove && requisition.requesterId !== user?.id;
+  };
+
   // Fetch off-site requisitions
   const {
     data: requisitions,
@@ -88,11 +94,10 @@ const OffsitePage: React.FC = () => {
   // Create return mutation
   const createReturnMutation = useMutation({
     mutationFn: async ({ requisitionId, data }: { requisitionId: string; data: any }) => {
-      const res = await fetch(`/api/offsite/requisitions/${requisitionId}/returns`, {
+      const res = await apiFetch(`/offsite/requisitions/${requisitionId}/returns`, token, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -115,9 +120,8 @@ const OffsitePage: React.FC = () => {
   // Approve requisition mutation
   const approveRequisitionMutation = useMutation({
     mutationFn: async (requisitionId: string) => {
-      const res = await fetch(`/api/offsite/requisitions/${requisitionId}/approve`, {
+      const res = await apiFetch(`/offsite/requisitions/${requisitionId}/approve`, token, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to approve requisition');
       return res.json();
@@ -135,9 +139,8 @@ const OffsitePage: React.FC = () => {
   // Reject requisition mutation
   const rejectRequisitionMutation = useMutation({
     mutationFn: async (requisitionId: string) => {
-      const res = await fetch(`/api/offsite/requisitions/${requisitionId}/reject`, {
+      const res = await apiFetch(`/offsite/requisitions/${requisitionId}/reject`, token, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to reject requisition');
       return res.json();
@@ -155,11 +158,10 @@ const OffsitePage: React.FC = () => {
   // Update requisition mutation
   const updateRequisitionMutation = useMutation({
     mutationFn: async ({ requisitionId, data }: { requisitionId: string; data: any }) => {
-      const res = await fetch(`/api/offsite/requisitions/${requisitionId}`, {
+      const res = await apiFetch(`/offsite/requisitions/${requisitionId}`, token, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
@@ -482,8 +484,8 @@ const OffsitePage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Approve Action - Only for admin/manager on pending requisitions */}
-                            {canApprove && req.status === 'pending' && (
+                            {/* Approve Action - Only for admin/manager on pending requisitions (but not their own) */}
+                            {canApproveRequisition(req) && req.status === 'pending' && (
                               <button
                                 onClick={() => handleApproveRequisition(req.id)}
                                 className="p-1 text-green-600 rounded hover:text-green-800"
@@ -494,8 +496,8 @@ const OffsitePage: React.FC = () => {
                               </button>
                             )}
 
-                            {/* Reject Action - Only for admin/manager on pending requisitions */}
-                            {canApprove && req.status === 'pending' && (
+                            {/* Reject Action - Only for admin/manager on pending requisitions (but not their own) */}
+                            {canApproveRequisition(req) && req.status === 'pending' && (
                               <button
                                 onClick={() => handleRejectRequisition(req.id)}
                                 className="p-1 text-red-600 rounded hover:text-red-800"
