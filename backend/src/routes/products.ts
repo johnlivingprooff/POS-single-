@@ -88,7 +88,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     if (stockType === 'finished_good') {
       return res.status(400).json({ error: 'Finished goods must be created via the BOM workflow. Direct creation is not allowed.' });
     }
-    if (stockType !== 'raw_material' && stockType !== 'asset_equipment') {
+    if (stockType !== 'raw_material' && stockType !== 'asset_equipment' && stockType !== 'consumable') {
       return res.status(400).json({ error: 'Invalid stock type. Only raw_material and asset_equipment can be created here.' });
     }
 
@@ -116,6 +116,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         categoryId: categoryId || null,
         supplierId: supplierId || null,
         stockType,
+        assetCategory: (stockType === 'asset_equipment') ? 'fixed_asset': 'current_asset',
         measurementType: stockType === 'raw_material' ? measurementType : null,
         measurementValue: stockType === 'raw_material' ? measurementValue : null,
         availableQuantities

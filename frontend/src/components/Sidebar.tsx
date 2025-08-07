@@ -33,7 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
     { name: 'Sales Records', href: '/sales', icon: FileText, roles: ['admin', 'manager', 'employee'] },
     { name: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'manager'] },
     { name: 'Customers', href: '/customers', icon: Heart, roles: ['admin', 'manager'] },
-    { name: 'Manufacturing', href: '/manufacturing', icon: Factory, roles: ['admin', 'manager'] },
+    // { name: 'Manufacturing', href: '/manufacturing', icon: Factory, roles: ['admin', 'manager'] },
     // { name: 'Notifications', href: '/notifications', icon: Bell, roles: ['admin', 'manager', 'employee'] },
     { name: 'Users', href: '/users', icon: Users, roles: ['admin'] },
   ];

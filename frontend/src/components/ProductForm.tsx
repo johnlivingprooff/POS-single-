@@ -21,7 +21,7 @@ interface ProductFormProps {
     category: CategoryOrSupplier | string | null;
     supplier: CategoryOrSupplier | string | null;
     reorderLevel: number;
-    stockType: 'raw_material' | 'asset_equipment' | 'finished_good';
+    stockType: 'raw_material' | 'asset_equipment' | 'finished_good' | 'consumable';
     pricingMethod: 'markup' | 'margin' | 'fixed';
     pricingOverride: boolean;
     measurementType: string;
@@ -34,8 +34,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
   const { token } = useAuthStore();
   // Determine if editing
   const isEdit = !!initialValues?.name;
-  // Only restrict fields for raw_material edit
-  const isEditRawMaterial = isEdit && (initialValues?.stockType === 'raw_material');
+  // Only restrict fields for raw_material & consumable edit
+  const isEditRawMaterial = isEdit && (initialValues?.stockType === 'raw_material' || initialValues?.stockType === 'consumable');
 
   // If finished good, show info and disable form
     const isFG = isFinishedGood || initialValues?.stockType === 'finished_good'; // This line remains unchanged
@@ -65,7 +65,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
     categoryId: string;
     supplierId: string;
     reorderLevel: number;
-    stockType: 'raw_material' | 'asset_equipment'; // Remove 'finished_good' from allowed types
+    stockType: 'raw_material' | 'asset_equipment' | 'consumable'; 
     pricingMethod: 'markup' | 'margin' | 'fixed';
     pricingOverride: boolean;
     measurementType: string;
@@ -120,10 +120,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
       </div>
             {!isFG && (
         <div>
-          <label className="block text-sm font-medium text-gray-700">Stock Type</label>
+          <label className="block text-sm font-medium text-gray-700">Product Type</label>
           <select name="stockType" value={form.stockType} onChange={handleChange} className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md">
-            <option value="raw_material">Raw Material</option>
-            <option value="asset_equipment">Asset/Equipment</option>
+            <option value="raw_material">Current Asset</option>
+            {/* <option value="consumable">Consumable</option> */}
+            <option value="asset_equipment">Fixed Asset</option>
           </select>
         </div>
       )}

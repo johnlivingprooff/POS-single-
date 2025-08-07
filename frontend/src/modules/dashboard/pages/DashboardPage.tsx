@@ -236,14 +236,14 @@ const DashboardPage: React.FC = () => {
                 >
                   Open POS Terminal
                 </button>
-                {canCreateProducts && (
+                {/* {canCreateProducts && (
                   <button
                     className="w-full px-4 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200"
                     onClick={() => setShowAddProductModal(true)}
                   >
                     Add New Product
                   </button>
-                )}
+                )} */}
       {/* Modal for Add New Product */}
       {canCreateProducts && (
         <Modal open={showAddProductModal} onClose={() => setShowAddProductModal(false)} title="Add New Product">
