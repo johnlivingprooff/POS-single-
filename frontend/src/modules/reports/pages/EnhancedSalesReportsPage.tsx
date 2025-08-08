@@ -65,6 +65,31 @@ const SalesReportsPage: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'products' | 'customers' | 'details'>('overview');
   const [showFilters, setShowFilters] = useState(false);
+  const [currency, setCurrency] = useState<string>(''); // State to hold currency symbol
+
+  // Fetch currency setting
+  const { data: currencyData } = useQuery(['currency', token], async () => {
+    if (!token) return null;
+    const res = await apiFetch('/settings/currency', token);
+    if (!res.ok) throw new Error('Failed to fetch currency');
+    return res.json();
+  }, {
+    enabled: !!token,
+    onSuccess: (data) => {
+      if (data?.currency) {
+        // Map currency codes to symbols
+        const currencySymbols: Record<string, string> = {
+          'USD': '$',
+          'EUR': '€',
+          'GBP': '£',
+          'JPY': '¥',
+          'CNY': '¥',
+          'INR': '₹'
+        };
+        setCurrency(currencySymbols[data.currency] || data.currency);
+      }
+    }
+  });
 
   // Fetch sales analytics data
   const {
@@ -414,7 +439,7 @@ const SalesReportsPage: React.FC = () => {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      ${Number(summary.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {currency}{Number(summary.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </dd>
                   </dl>
                 </div>
@@ -448,7 +473,7 @@ const SalesReportsPage: React.FC = () => {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Average Sale</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      ${Number(summary.averageSale || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {currency}{Number(summary.averageSale || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </dd>
                   </dl>
                 </div>
@@ -466,7 +491,7 @@ const SalesReportsPage: React.FC = () => {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Net Revenue</dt>
                     <dd className="text-lg font-medium text-gray-900">
-                      ${Number(summary.netRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {currency}{Number(summary.netRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </dd>
                   </dl>
                 </div>
@@ -514,7 +539,7 @@ const SalesReportsPage: React.FC = () => {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" />
                         <YAxis />
-                        <Tooltip formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Revenue']} />
+                        <Tooltip formatter={(value: any) => [`${currency}${Number(value).toFixed(2)}`, 'Revenue']} />
                         <Area
                           type="monotone"
                           dataKey="revenue"
@@ -549,7 +574,7 @@ const SalesReportsPage: React.FC = () => {
                                 <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Total']} />
+                            <Tooltip formatter={(value: any) => [`${currency}${Number(value).toFixed(2)}`, 'Total']} />
                           </PieChart>
                         </ResponsiveContainer>
                       </div>
@@ -564,7 +589,7 @@ const SalesReportsPage: React.FC = () => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="category" />
                             <YAxis />
-                            <Tooltip formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Revenue']} />
+                            <Tooltip formatter={(value: any) => [`${currency}${Number(value).toFixed(2)}`, 'Revenue']} />
                             <Bar dataKey="totalRevenue" fill="#82ca9d" />
                           </BarChart>
                         </ResponsiveContainer>
@@ -595,7 +620,7 @@ const SalesReportsPage: React.FC = () => {
                           dataKey="revenue"
                           stroke="#8884d8"
                           strokeWidth={2}
-                          name="Revenue ($)"
+                          name={`Revenue (${currency})`}
                         />
                         <Line
                           yAxisId="right"
@@ -649,7 +674,7 @@ const SalesReportsPage: React.FC = () => {
                               {item.quantitySold}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                              ${Number(item.revenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                              {currency}{Number(item.revenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </td>
                           </tr>
                         ))}
@@ -693,7 +718,7 @@ const SalesReportsPage: React.FC = () => {
                                 {item.quantitySold}
                               </td>
                               <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                                ${Number(item.revenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                                {currency}{Number(item.revenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                               </td>
                             </tr>
                           ))}
@@ -741,7 +766,7 @@ const SalesReportsPage: React.FC = () => {
                               {customer.transactionCount}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                              ${Number(customer.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                              {currency}{Number(customer.totalRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </td>
                           </tr>
                         ))}
@@ -802,7 +827,7 @@ const SalesReportsPage: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                              ${Number(sale.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                              {currency}{Number(sale.total).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                             </td>
                           </tr>
                         ))}

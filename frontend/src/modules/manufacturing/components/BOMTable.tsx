@@ -75,9 +75,15 @@ export default function BOMTable() {
       });
       costPrice += total;
     }
+    // COMMENTED OUT: Manufacturing pricing disabled for direct sales-from-inventory model
     // Use markup for preview (25%)
-    let price = costPrice * 1.25;
-    let priceFormula = `costPrice * 1.25 = ${costPrice} * 1.25`;
+    // let price = costPrice * 1.25;
+    // let priceFormula = `costPrice * 1.25 = ${costPrice} * 1.25`;
+    
+    // DIRECT SALES MODEL: Price equals cost price
+    let price = costPrice;
+    let priceFormula = `Direct sales model: price = costPrice = ${costPrice}`;
+    
     price = Math.round(price * 100) / 100;
     return { costPrice, price, priceFormula, costBreakdown };
   }

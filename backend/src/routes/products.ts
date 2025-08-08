@@ -160,7 +160,10 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       data: {
         name,
         sku,
-        price: 0, // Price is always 0 for raw_material and asset_equipment
+        // BUSINESS LOGIC: For direct sales-from-inventory model
+        // - Raw materials and assets: price = 0 (not for sale)
+        // - Finished goods: price = costPrice (direct sales model)
+        price: stockType === 'finished_good' ? baseCost : 0,
         costPrice: baseCost,
         unitCost,
         stock: stockInt,

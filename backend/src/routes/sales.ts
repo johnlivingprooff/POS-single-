@@ -155,11 +155,12 @@ router.post('/', [
     }
 
     // Check stock availability and calculate subtotal
+    // BUSINESS LOGIC: Direct sales-from-inventory model - products sold at costPrice
     let subtotal = 0;
     const saleItems: Array<{
       productId: string;
       quantity: number;
-      unitPrice: number;
+      unitPrice: number; // This now represents costPrice from frontend
       total: number;
     }> = [];
 
@@ -175,6 +176,7 @@ router.post('/', [
         });
       }
 
+      // CHANGED: unitPrice now comes from frontend as costPrice (direct sales model)
       const itemTotal = item.quantity * item.unitPrice;
       subtotal += itemTotal;
 

@@ -16,6 +16,7 @@ interface CartItem {
   id: string;
   name: string;
   price: number;
+  costPrice: number;
   quantity: number;
   sku: string;
 }
@@ -186,7 +187,7 @@ const POSPage: React.FC = () => {
   };
 
   const getSubtotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + (item.costPrice * item.quantity), 0);
   };
 
   const getDiscountAmount = () => {
@@ -260,7 +261,8 @@ const POSPage: React.FC = () => {
         items: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          unitPrice: item.price
+          // CHANGED: Using costPrice instead of price for direct sales-from-inventory model
+          unitPrice: item.costPrice  // Was: item.price
         })),
         paymentMethod: method,
         discount: getDiscountAmount(),
@@ -312,14 +314,15 @@ const POSPage: React.FC = () => {
           name: item.name,
           quantity: item.quantity,
           price: item.price,
-          total: item.price * item.quantity
+          costPrice: item.costPrice,
+          total: item.costPrice * item.quantity
         })),
         subtotal: getSubtotal(),
         tax: getTaxAmount(),
         discount: getDiscountAmount(),
         total: getTotal(),
         paymentMethod: paymentMethod === 'other' ? otherPayment : paymentMethod,
-        currency: currencyData?.currency || 'USD', // Use actual currency from settings
+        currency: currencyData?.currency, // Use actual currency from settings
         currencySymbol: currency
       };
       
@@ -423,7 +426,7 @@ const POSPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900">{product.name}</h3>
                 <p className="mb-2 text-sm text-gray-600">SKU: {product.sku}</p>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-lg font-bold text-primary">{currency}{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-primary">{currency}{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-sm font-medium text-gray-500">
                     {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
                   </p>
@@ -488,7 +491,7 @@ const POSPage: React.FC = () => {
                 <h3 className="font-semibold text-gray-900">{item.name}</h3>
                 <p className="text-sm text-gray-600">SKU: {item.sku}</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-lg font-bold text-primary">{currency}{Number(item.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-lg font-bold text-primary">{currency}{Number(item.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-gray-500">{currentStock} available</p>
                 </div>
                 
@@ -524,7 +527,7 @@ const POSPage: React.FC = () => {
                 
                 <div className="mt-2 text-right">
                   <p className="font-bold">
-                    Subtotal: {currency}{(item.price * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    Subtotal: {currency}{(item.costPrice * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   {isAtMaxQuantity && (
                     <p className="mt-1 text-xs text-amber-600">Maximum stock reached</p>
