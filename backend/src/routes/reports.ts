@@ -888,7 +888,8 @@ router.get('/sales/export/excel', async (req: AuthRequest, res: Response) => {
         productSKU: item.product.sku,
         category: item.product.category?.name || 'Uncategorized',
         quantity: item.quantity,
-        unitPrice: Number(item.unitPrice),
+        // BUSINESS LOGIC: unitPrice now represents costPrice in direct sales-from-inventory model
+        unitPrice: Number(item.unitPrice), // This is costPrice from the sale
         total: Number(item.total)
       }))
     );

@@ -124,11 +124,15 @@ const InventoryPage: React.FC = () => {
     return cost;
   };
 
-  // Calculate suggested price (markup from sales settings or product)
+  // Calculate suggested price - UPDATED for direct sales model
   const getSuggestedPrice = () => {
     const unitCost = getUnitCost();
+    // COMMENTED OUT: Manufacturing markup disabled for direct sales-from-inventory model
     // For demo, use 25% markup (can fetch from settings)
-    return +(unitCost * 1.25).toFixed(2);
+    // return +(unitCost * 1.25).toFixed(2);
+    
+    // DIRECT SALES MODEL: Price equals cost price
+    return +unitCost.toFixed(2);
   };
   const handleManufacture = async (e: React.FormEvent) => {
     e.preventDefault();

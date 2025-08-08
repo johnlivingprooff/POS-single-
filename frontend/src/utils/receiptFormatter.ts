@@ -1,3 +1,9 @@
+// import { useState } from "react";
+// import { useAuthStore } from "../stores/authStore";
+// import { apiFetch } from "../lib/api-utils";
+// import { useQuery } from '@tanstack/react-query';
+
+
 // Receipt formatting utilities for different paper sizes
 export interface PaperSize {
   name: string;
@@ -25,6 +31,7 @@ export interface ReceiptData {
     name: string;
     quantity: number;
     price: number;
+    costPrice: number;
     total: number;
   }>;
   subtotal: number;
@@ -162,6 +169,12 @@ export function generateReceiptHTML(
     </style>
   `;
 
+  // Helper to format numbers in accounting style (negative numbers in parentheses, no currency symbol)
+  function formatAccounting(value: number): string {
+    const absValue = Math.abs(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value < 0 ? `(${absValue})` : absValue;
+  }
+
   const receiptHTML = `
     <!DOCTYPE html>
     <html>
@@ -186,12 +199,18 @@ export function generateReceiptHTML(
         </div>
         
         <div class="items">
+          <div class="item">
+            <div class="item-name">Item</div>
+            <div class="item-qty">Qty</div>
+            <div class="item-price">Price ${data.currencySymbol}</div>
+            <div class="item-total">Total ${data.currencySymbol}</div>
+          </div>
           ${data.items.map(item => `
             <div class="item">
               <div class="item-name">${item.name}</div>
               <div class="item-qty">${item.quantity}x</div>
-              <div class="item-price">${data.currencySymbol}${Number(item.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              <div class="item-total">${data.currencySymbol}${item.total.toFixed(2)}</div>
+              <div class="item-price">${formatAccounting(item.costPrice)}</div>
+              <div class="item-total">${formatAccounting(item.total)}</div>
             </div>
           `).join('')}
         </div>
@@ -199,23 +218,23 @@ export function generateReceiptHTML(
         <div class="totals">
           <div class="total-line">
             <span>Subtotal:</span>
-            <span>${data.currencySymbol}${data.subtotal.toFixed(2)}</span>
+            <span>${data.currencySymbol} ${formatAccounting(data.subtotal)}</span>
           </div>
           ${data.discount > 0 ? `
             <div class="total-line">
               <span>Discount:</span>
-              <span>-${data.currencySymbol}${data.discount.toFixed(2)}</span>
+              <span>-${data.currencySymbol} ${formatAccounting(data.discount)}</span>
             </div>
           ` : ''}
           ${data.tax > 0 ? `
             <div class="total-line">
               <span>Tax:</span>
-              <span>${data.currencySymbol}${data.tax.toFixed(2)}</span>
+              <span>${data.currencySymbol} ${formatAccounting(data.tax)}</span>
             </div>
           ` : ''}
           <div class="total-line final-total">
             <span>TOTAL:</span>
-            <span>${data.currencySymbol}${data.total.toFixed(2)}</span>
+            <span>${data.currencySymbol} ${formatAccounting(data.total)}</span>
           </div>
         </div>
         

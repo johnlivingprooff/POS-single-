@@ -81,22 +81,29 @@ const SalesPricingConfiguration: React.FC = () => {
   const isMarkupValid = markup >= 0 && markup <= 1000;
   const isMarginValid = margin >= 0 && margin < 100;
 
-  // Example calculation
+  // Example calculation - UPDATED for direct sales model
   const cost = 100;
   let exampleSellingPrice = 0;
   let exampleMarkup = 0;
   let exampleMargin = 0;
-  if (method === 'markup') {
-    exampleSellingPrice = cost * (1 + markup / 100);
-    exampleMargin = ((exampleSellingPrice - cost) / exampleSellingPrice) * 100;
-  } else if (method === 'margin') {
-    exampleSellingPrice = cost / (1 - margin / 100);
-    exampleMarkup = ((exampleSellingPrice - cost) / cost) * 100;
-  } else if (method === 'fixed') {
-    exampleSellingPrice = 120;
-    exampleMarkup = ((exampleSellingPrice - cost) / cost) * 100;
-    exampleMargin = ((exampleSellingPrice - cost) / exampleSellingPrice) * 100;
-  }
+  
+  // COMMENTED OUT: Manufacturing pricing disabled for direct sales-from-inventory model
+  // if (method === 'markup') {
+  //   exampleSellingPrice = cost * (1 + markup / 100);
+  //   exampleMargin = ((exampleSellingPrice - cost) / exampleSellingPrice) * 100;
+  // } else if (method === 'margin') {
+  //   exampleSellingPrice = cost / (1 - margin / 100);
+  //   exampleMarkup = ((exampleSellingPrice - cost) / cost) * 100;
+  // } else if (method === 'fixed') {
+  //   exampleSellingPrice = 120;
+  //   exampleMarkup = ((exampleSellingPrice - cost) / cost) * 100;
+  //   exampleMargin = ((exampleSellingPrice - cost) / exampleSellingPrice) * 100;
+  // }
+  
+  // DIRECT SALES MODEL: Selling price equals cost price
+  exampleSellingPrice = cost;
+  exampleMarkup = 0; // No markup in direct sales model
+  exampleMargin = 0; // No margin in direct sales model
 
   const handleSave = () => {
     mutation.mutate({
@@ -112,7 +119,21 @@ const SalesPricingConfiguration: React.FC = () => {
 
   return (
     <div className="w-full mt-4">
-      <h2 className="mb-8 text-2xl font-semibold text-gray-800">Pricing Configuration</h2>
+      <h2 className="mb-4 text-2xl font-semibold text-gray-800">Pricing Configuration</h2>
+      
+      {/* Business Model Notice */}
+      <div className="p-4 mb-8 border-l-4 border-blue-500 bg-blue-50">
+        <div className="flex">
+          <div className="ml-3">
+            <p className="text-sm text-blue-700">
+              <strong>Notice:</strong> This system is currently configured for direct sales-from-inventory model. 
+              Products are sold at their cost price without markup or margin calculations. 
+              Manufacturing pricing features are disabled for this iteration.
+            </p>
+          </div>
+        </div>
+      </div>
+      
       <div className="grid w-full grid-cols-1 gap-8 mb-8 md:grid-cols-2">
         <div>
           <label className="block mb-2 text-sm font-medium text-gray-700">Pricing Method</label>

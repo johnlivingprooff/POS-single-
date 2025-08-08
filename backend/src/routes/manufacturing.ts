@@ -71,18 +71,25 @@ router.get('/bom/:id/price', async (req: AuthRequest, res: Response) => {
     const defaultMargin = salesSettings?.defaultMarginPercentage || 20;
     
     let priceFormula = '';
-    if (bom.product?.pricingOverride && typeof bom.product?.price === 'number' && !isNaN(Number(bom.product.price))) {
-      price = Number(bom.product.price);
-      priceFormula = 'Override';
-    } else if (priceMethod === 'markup') {
-      price = unitCost * (1 + defaultMarkup / 100);
-      priceFormula = `costPrice * (1 + ${defaultMarkup}%) = ${unitCost} * ${1 + defaultMarkup / 100}`;
-    } else if (priceMethod === 'margin') {
-      price = unitCost / (1 - (defaultMargin / 100));
-      priceFormula = `costPrice / (1 - ${defaultMargin}%) = ${unitCost} / ${1 - defaultMargin / 100}`;
-    } else {
-      priceFormula = 'Unknown pricing method, using costPrice';
-    }
+    
+    // COMMENTED OUT: Manufacturing pricing disabled for direct sales-from-inventory model
+    // if (bom.product?.pricingOverride && typeof bom.product?.price === 'number' && !isNaN(Number(bom.product.price))) {
+    //   price = Number(bom.product.price);
+    //   priceFormula = 'Override';
+    // } else if (priceMethod === 'markup') {
+    //   price = unitCost * (1 + defaultMarkup / 100);
+    //   priceFormula = `costPrice * (1 + ${defaultMarkup}%) = ${unitCost} * ${1 + defaultMarkup / 100}`;
+    // } else if (priceMethod === 'margin') {
+    //   price = unitCost / (1 - (defaultMargin / 100));
+    //   priceFormula = `costPrice / (1 - ${defaultMargin}%) = ${unitCost} / ${1 - defaultMargin / 100}`;
+    // } else {
+    //   priceFormula = 'Unknown pricing method, using costPrice';
+    // }
+    
+    // DIRECT SALES MODEL: Price equals cost price
+    price = unitCost;
+    priceFormula = 'Direct sales model: price = costPrice';
+    
     price = Math.round(price * 100) / 100;
     return res.json({
       priceDetails: {
@@ -489,18 +496,25 @@ router.post('/bom', async (req: AuthRequest, res: Response) => {
     const defaultMargin = salesSettings?.defaultMarginPercentage || 20;
     
     let priceFormula = '';
-    if (finishedGood.pricingOverride && typeof finishedGood.price === 'number' && !isNaN(finishedGood.price)) {
-      price = finishedGood.price;
-      priceFormula = 'Override';
-    } else if (priceMethod === 'markup') {
-      price = costPrice * (1 + defaultMarkup / 100);
-      priceFormula = `costPrice * (1 + markup/100) = ${costPrice} * (1 + ${defaultMarkup}/100)`;
-    } else if (priceMethod === 'margin') {
-      price = costPrice / (1 - (defaultMargin / 100));
-      priceFormula = `costPrice / (1 - margin/100) = ${costPrice} / (1 - ${defaultMargin}/100)`;
-    } else {
-      priceFormula = 'Unknown pricing method, using costPrice';
-    }
+    
+    // COMMENTED OUT: Manufacturing pricing disabled for direct sales-from-inventory model
+    // if (finishedGood.pricingOverride && typeof finishedGood.price === 'number' && !isNaN(finishedGood.price)) {
+    //   price = finishedGood.price;
+    //   priceFormula = 'Override';
+    // } else if (priceMethod === 'markup') {
+    //   price = costPrice * (1 + defaultMarkup / 100);
+    //   priceFormula = `costPrice * (1 + markup/100) = ${costPrice} * (1 + ${defaultMarkup}/100)`;
+    // } else if (priceMethod === 'margin') {
+    //   price = costPrice / (1 - (defaultMargin / 100));
+    //   priceFormula = `costPrice / (1 - margin/100) = ${costPrice} / (1 - ${defaultMargin}/100)`;
+    // } else {
+    //   priceFormula = 'Unknown pricing method, using costPrice';
+    // }
+    
+    // DIRECT SALES MODEL: Price equals cost price
+    price = costPrice;
+    priceFormula = 'Direct sales model: price = costPrice';
+    
     // Optionally round price
     price = Math.round(price * 100) / 100;
     // Update product with calculated price/costPrice (always store calculated price unless override)
@@ -695,29 +709,33 @@ router.post('/orders/:id/complete', async (req: AuthRequest, res: Response) => {
     const defaultMarkup = salesSettings?.defaultMarkupPercentage || 25;
     const defaultMargin = salesSettings?.defaultMarginPercentage || 20;
     
-    // Check if product has pricing override
-    if (finishedProduct.pricingOverride && typeof finishedProduct.price === 'number' && !isNaN(finishedProduct.price)) {
-      // Keep existing price - do not update
-      finishedGoodPrice = Number(finishedProduct.price);
-    } else if (pricingMethod === 'markup') {
-      // Use default markup percentage
-      finishedGoodPrice = costPerUnit * (1 + defaultMarkup / 100);
-    } else if (pricingMethod === 'margin') {
-      // Use default margin percentage  
-      finishedGoodPrice = costPerUnit / (1 - (defaultMargin / 100));
-    } // else keep existing price for unknown methods
+    // COMMENTED OUT: Manufacturing pricing disabled for direct sales-from-inventory model
+    // // Check if product has pricing override
+    // if (finishedProduct.pricingOverride && typeof finishedProduct.price === 'number' && !isNaN(finishedProduct.price)) {
+    //   // Keep existing price - do not update
+    //   finishedGoodPrice = Number(finishedProduct.price);
+    // } else if (pricingMethod === 'markup') {
+    //   // Use default markup percentage
+    //   finishedGoodPrice = costPerUnit * (1 + defaultMarkup / 100);
+    // } else if (pricingMethod === 'margin') {
+    //   // Use default margin percentage  
+    //   finishedGoodPrice = costPerUnit / (1 - (defaultMargin / 100));
+    // } // else keep existing price for unknown methods
+    
+    // DIRECT SALES MODEL: Price equals cost price
+    finishedGoodPrice = costPerUnit;
     
     // Round price to 2 decimal places
     finishedGoodPrice = Math.round(finishedGoodPrice * 100) / 100;
     
-    // Increase finished good stock and update price if not fixed or overridden
-    const shouldUpdatePrice = !finishedProduct.pricingOverride && pricingMethod !== 'fixed';
+    // Increase finished good stock and update price (always update to costPrice in direct sales model)
+    // const shouldUpdatePrice = !finishedProduct.pricingOverride && pricingMethod !== 'fixed';
     await prisma.product.update({
       where: { id: order.productId },
       data: {
         stock: { increment: order.quantity },
         costPrice: costPerUnit,
-        ...(shouldUpdatePrice ? { price: finishedGoodPrice } : {})
+        price: finishedGoodPrice // Always update price to match costPrice
       }
     });
     

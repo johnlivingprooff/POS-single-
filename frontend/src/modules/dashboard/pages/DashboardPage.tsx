@@ -19,6 +19,7 @@ import ProductForm from '../../../components/ProductForm';
 const DashboardPage: React.FC = () => {
   const [showAddProductModal, setShowAddProductModal] = React.useState(false);
   const [addProductLoading, setAddProductLoading] = React.useState(false);
+  const [currency, setCurrency] = React.useState<string>(''); 
   const handleAddProduct = async (data: any) => {
     setAddProductLoading(true);
     try {
@@ -111,6 +112,30 @@ const DashboardPage: React.FC = () => {
     onError: () => handleError('Failed to load inventory stats.')
   });
 
+  // Fetch currency setting
+  const { data: currencyData } = useQuery(['currency', token], async () => {
+    if (!token) return null;
+    const res = await apiFetch('/settings/currency', token);
+    if (!res.ok) throw new Error('Failed to fetch currency');
+    return res.json();
+  }, {
+    enabled: !!token,
+    onSuccess: (data) => {
+      if (data?.currency) {
+        // Map currency codes to symbols
+        const currencySymbols: Record<string, string> = {
+          'USD': '$',
+          'EUR': '€',
+          'GBP': '£',
+          'JPY': '¥',
+          'CNY': '¥',
+          'INR': '₹'
+        };
+        setCurrency(currencySymbols[data.currency] || data.currency);
+      }
+    }
+  });
+
   // Fetch total customers (pagination metadata)
   const {
     data: customersData,
@@ -153,7 +178,9 @@ const DashboardPage: React.FC = () => {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Today's Sales</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {salesStats?.totalRevenue?.toLocaleString() || '0.00'}
+                      {(typeof salesStats?.totalRevenue === 'number'
+                        ? salesStats.totalRevenue.toLocaleString(undefined, { style: 'currency', currency: currency })
+                        : (Number(salesStats?.totalRevenue) ? Number(salesStats.totalRevenue).toLocaleString(undefined, { style: 'currency', currency: currency }) : '0.00'))}
                     </p>
                   </div>
                 </div>

@@ -261,7 +261,8 @@ const POSPage: React.FC = () => {
         items: cart.map(item => ({
           productId: item.id,
           quantity: item.quantity,
-          unitPrice: item.price
+          // CHANGED: Using costPrice instead of price for direct sales-from-inventory model
+          unitPrice: item.costPrice  // Was: item.price
         })),
         paymentMethod: method,
         discount: getDiscountAmount(),
@@ -312,7 +313,8 @@ const POSPage: React.FC = () => {
         items: cart.map(item => ({
           name: item.name,
           quantity: item.quantity,
-          price: item.costPrice,
+          price: item.price,
+          costPrice: item.costPrice,
           total: item.costPrice * item.quantity
         })),
         subtotal: getSubtotal(),
@@ -320,7 +322,7 @@ const POSPage: React.FC = () => {
         discount: getDiscountAmount(),
         total: getTotal(),
         paymentMethod: paymentMethod === 'other' ? otherPayment : paymentMethod,
-        currency: currencyData?.currency || 'USD', // Use actual currency from settings
+        currency: currencyData?.currency, // Use actual currency from settings
         currencySymbol: currency
       };
       
