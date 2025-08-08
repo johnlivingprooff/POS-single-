@@ -167,8 +167,9 @@ model ProductPurchaseBatch {
 /// Stores global settings for the POS system, including inventory calculation method
 model Settings {
   id        String   @id @default(cuid())
-  key       String   @unique // e.g. 'inventoryCalculationMethod'
-  value     String // e.g. 'fifo', 'lifo', 'wac'
+  key       String   @unique // e.g. 'inventoryCalculationMethod', 'stocktakingActive'
+  value     String // e.g. 'fifo', 'lifo', 'wac', 'true', 'false'
+  createdBy String? // User ID who created/updated this setting
   updatedAt DateTime @updatedAt
 
   @@map("settings")

@@ -13,6 +13,7 @@ import PurchaseOrderForm from '../../../components/PurchaseOrderForm';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import TableSkeleton from '../../../components/TableSkeleton';
 import InventoryTabSkeleton from '../../../components/InventoryTabSkeleton';
+import StocktakingControl from '../../../components/StocktakingControl';
 import { useRealTimeRefresh, usePostMutationRefresh } from '../../../hooks/useRealTimeRefresh';
 
 interface Product {
@@ -311,7 +312,14 @@ const InventoryPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-8 text-3xl font-bold text-gray-900">Inventory Management</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Inventory Management</h1>
+        </div>
+        
+        {/* Stocktaking Control */}
+        <div className="mb-6">
+          <StocktakingControl />
+        </div>
         
         {productsLoading ? (
           <InventoryTabSkeleton activeTab={activeTab} />

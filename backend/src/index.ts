@@ -22,6 +22,7 @@ import suppliersRoutes from './routes/suppliers';
 import settingsRoutes from './routes/settings';
 import purchaseOrdersRouter from './routes/purchaseOrders';
 import offsiteRoutes from './routes/offsite';
+import stocktakingRoutes from './routes/stocktaking';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -105,6 +106,7 @@ app.use('/api/settings', authenticate, settingsRoutes);
 app.use('/api/notifications', authenticate, notificationsRouter);
 app.use('/api/purchase-orders', authenticate, purchaseOrdersRouter);
 app.use('/api/offsite', authenticate, offsiteRoutes);
+app.use('/api/stocktaking', authenticate, stocktakingRoutes);
 
 // Error handling middleware
 app.use(notFound);

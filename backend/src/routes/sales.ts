@@ -144,6 +144,17 @@ router.post('/', [
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
+    // Check if stocktaking is active
+    const stocktakingSetting = await prisma.settings.findUnique({
+      where: { key: 'stocktakingActive' }
+    });
+
+    if (stocktakingSetting?.value === 'true') {
+      return res.status(423).json({ 
+        error: 'Sales are currently blocked while stocktaking is in progress. Please wait until stocktaking is completed.' 
+      });
+    }
+
     // Validate all products exist and calculate totals
     const productIds = items.map((item: any) => item.productId);
     const products = await prisma.product.findMany({
