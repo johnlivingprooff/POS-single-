@@ -41,6 +41,17 @@ const DashboardPage: React.FC = () => {
   const { showToast } = useAppToast();
   const handleError = (msg: string) => showToast(msg, 'error');
 
+  // Helper function to format currency values
+  const formatCurrency = (amount: any): string => {
+    const numAmount = typeof amount === 'number' ? amount : Number(amount) || 0;
+    return numAmount.toLocaleString(undefined, { 
+      style: 'currency', 
+      currency: currencyData?.currency || 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   // Check if user can create products (admin and manager only)
   const canCreateProducts = user?.role === 'admin' || user?.role === 'manager';
 
@@ -178,9 +189,7 @@ const DashboardPage: React.FC = () => {
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600">Today's Sales</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {(typeof salesStats?.totalRevenue === 'number'
-                        ? salesStats.totalRevenue.toLocaleString(undefined, { style: 'currency', currency: currency })
-                        : (Number(salesStats?.totalRevenue) ? Number(salesStats.totalRevenue).toLocaleString(undefined, { style: 'currency', currency: currency }) : '0.00'))}
+                      {formatCurrency(salesStats?.totalRevenue)}
                     </p>
                   </div>
                 </div>
@@ -243,7 +252,7 @@ const DashboardPage: React.FC = () => {
                             </p>
                         </div>
                         <p className="font-semibold text-green-600">
-                          {typeof transaction.total === 'number' ? transaction.total.toFixed(2) : (Number(transaction.total) ? Number(transaction.total).toFixed(2) : '0.00')}
+                          {formatCurrency(transaction.total)}
                         </p>
                       </div>
                     ))
