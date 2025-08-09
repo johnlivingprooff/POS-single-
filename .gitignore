@@ -11,3 +11,4 @@ dist
 !.env.production.example
 scripts/deleteFinishedGoods.js
 MULTI_TENANT_REMOVAL_SUMMARY.md
+debug.log
