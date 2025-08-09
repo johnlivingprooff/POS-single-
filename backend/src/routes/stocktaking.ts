@@ -210,6 +210,8 @@ router.get('/report', async (req: AuthRequest, res: Response) => {
       ]
     });
 
+
+    // Edited this by taking out available quantities to properly represent inventory
     const report = {
       generatedAt: new Date(),
       totalProducts: products.length,
@@ -226,14 +228,10 @@ router.get('/report', async (req: AuthRequest, res: Response) => {
         supplier: product.supplier?.name || 'No Supplier',
         measurementType: product.measurementType,
         measurementValue: product.measurementValue,
-        availableQuantities: product.stockType === 'raw_material' 
-          ? product.availableQuantities || product.stock 
-          : product.stock,
+        availableQuantities: product.stock,
         costPrice: Number(product.costPrice),
         totalValue: (
-          (product.stockType === 'raw_material' 
-            ? (product.availableQuantities || product.stock) 
-            : product.stock) * Number(product.costPrice)
+          (product.stock) * Number(product.costPrice)
         )
       }))
     };
