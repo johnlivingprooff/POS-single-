@@ -409,16 +409,16 @@ const InventoryPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.sku}</td>
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                        {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${product.stock <= product.reorderLevel ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{product.stock} packs</span>
-                        </td> */}
                         <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs rounded-full ${product.stock <= product.reorderLevel ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>{product.stock} packs</span>
+                        </td>
+                        {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {typeof product.availableQuantities === 'number' && product.measurementType ? (
                             <span>{product.availableQuantities} {product.measurementType}</span>
                           ) : (
                             <span className="text-gray-400">N/A</span>
                           )}
-                        </td>
+                        </td> */}
                         
                        
                         {/* <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{product.stockType}</td> */}
