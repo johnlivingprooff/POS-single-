@@ -214,9 +214,7 @@ router.get('/report', async (req: AuthRequest, res: Response) => {
       generatedAt: new Date(),
       totalProducts: products.length,
       totalValue: products.reduce((sum, product) => {
-        const stock = product.stockType === 'raw_material' 
-          ? (product.availableQuantities || product.stock) 
-          : product.stock;
+        const stock = product.stock;
         return sum + (stock * Number(product.costPrice));
       }, 0),
       products: products.map(product => ({
