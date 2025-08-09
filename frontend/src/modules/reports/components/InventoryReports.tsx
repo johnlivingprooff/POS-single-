@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useAppToast } from '../../../hooks/useAppToast';
+import { useCurrency } from '../../../utils/setCurrency';
 import {
   LineChart,
   Line,
@@ -63,6 +64,18 @@ const InventoryReports: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState<'overview' | 'movements' | 'lowstock' | 'valuation' | 'offsite'>('overview');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Set Currency
+  const currency = useCurrency(token);
+  const formatCurrency = (amount: any): string => {
+    const numAmount = typeof amount === 'number' ? amount : Number(amount) || 0;
+    return numAmount.toLocaleString(undefined, { 
+      style: 'currency', 
+      currency: currency.currencyValue || 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
 
   // Fetch inventory reports data
   const {
@@ -224,20 +237,20 @@ const InventoryReports: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="w-12 h-12 border-b-2 rounded-full animate-spin border-primary"></div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="text-center py-12">
-        <AlertTriangleIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Inventory Reports</h3>
-        <p className="text-gray-500 mb-4">We couldn't load your inventory data. Please try again.</p>
+      <div className="py-12 text-center">
+        <AlertTriangleIcon className="w-12 h-12 mx-auto mb-4 text-red-500" />
+        <h3 className="mb-2 text-lg font-medium text-gray-900">Error Loading Inventory Reports</h3>
+        <p className="mb-4 text-gray-500">We couldn't load your inventory data. Please try again.</p>
         <button
           onClick={() => refetch()}
-          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark"
+          className="px-4 py-2 text-white rounded-md bg-primary hover:bg-primary-dark"
         >
           Try Again
         </button>
@@ -353,13 +366,13 @@ const InventoryReports: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="overflow-hidden bg-white rounded-lg shadow">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <PackageIcon className="h-6 w-6 text-gray-400" />
+                <PackageIcon className="w-6 h-6 text-gray-400" />
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="flex-1 w-0 ml-5">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Products</dt>
                   <dd className="text-lg font-medium text-gray-900">{summary.totalProducts || 0}</dd>
@@ -369,29 +382,29 @@ const InventoryReports: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="overflow-hidden bg-white rounded-lg shadow">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <BarChart3Icon className="h-6 w-6 text-green-400" />
+                <BarChart3Icon className="w-6 h-6 text-green-400" />
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="flex-1 w-0 ml-5">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Valuation</dt>
-                  <dd className="text-lg font-medium text-gray-900">${summary.totalValuation || 0}</dd>
+                  <dd className="text-lg font-medium text-gray-900">{formatCurrency(summary.totalValue)}</dd>
                 </dl>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="overflow-hidden bg-white rounded-lg shadow">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <AlertTriangleIcon className="h-6 w-6 text-red-400" />
+                <AlertTriangleIcon className="w-6 h-6 text-red-400" />
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="flex-1 w-0 ml-5">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Low Stock Items</dt>
                   <dd className="text-lg font-medium text-gray-900">{summary.lowStockCount || 0}</dd>
@@ -401,13 +414,13 @@ const InventoryReports: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="overflow-hidden bg-white rounded-lg shadow">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <TrendingUpIcon className="h-6 w-6 text-blue-400" />
+                <TrendingUpIcon className="w-6 h-6 text-blue-400" />
               </div>
-              <div className="ml-5 w-0 flex-1">
+              <div className="flex-1 w-0 ml-5">
                 <dl>
                   <dt className="text-sm font-medium text-gray-500 truncate">Off-site Items</dt>
                   <dd className="text-lg font-medium text-gray-900">{summary.offsiteItemsCount || 0}</dd>
@@ -419,9 +432,9 @@ const InventoryReports: React.FC = () => {
       </div>
 
       {/* Content Tabs */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-white rounded-lg shadow">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex">
+          <nav className="flex -mb-px">
             {[
               { id: 'overview', name: 'Stock Overview' },
               { id: 'movements', name: 'Stock Movements' },
@@ -448,7 +461,7 @@ const InventoryReports: React.FC = () => {
             <div className="space-y-6">
               {/* Stock Movement Chart */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Stock Movement Trends</h3>
+                <h3 className="mb-4 text-lg font-medium text-gray-900">Stock Movement Trends</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={inventoryData?.stockMovementChart || []}>
@@ -466,7 +479,7 @@ const InventoryReports: React.FC = () => {
 
               {/* Category Breakdown */}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Stock by Category</h3>
+                <h3 className="mb-4 text-lg font-medium text-gray-900">Stock by Category</h3>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -494,30 +507,30 @@ const InventoryReports: React.FC = () => {
 
           {activeTab === 'movements' && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Inventory Adjustments</h3>
+              <h3 className="mb-4 text-lg font-medium text-gray-900">Recent Inventory Adjustments</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Previous</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">New Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Date</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Type</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Quantity</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Previous</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">New Stock</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Reason</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {(inventoryData?.inventoryAdjustments || []).map((adj: any) => (
                       <tr key={adj.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {format(new Date(adj.createdAt), 'MMM dd, yyyy HH:mm')}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {adj.product.name} <span className="text-gray-500">({adj.product.sku})</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                             adj.type === 'stock_in' ? 'bg-green-100 text-green-800' :
                             adj.type === 'stock_out' ? 'bg-red-100 text-red-800' :
@@ -526,11 +539,11 @@ const InventoryReports: React.FC = () => {
                             {adj.type.replace('_', ' ').toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {adj.quantity > 0 ? '+' : ''}{adj.quantity}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adj.previousStock}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{adj.newStock}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{adj.previousStock}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{adj.newStock}</td>
                         <td className="px-6 py-4 text-sm text-gray-900">{adj.reason || 'N/A'}</td>
                       </tr>
                     ))}
@@ -542,10 +555,10 @@ const InventoryReports: React.FC = () => {
 
           {activeTab === 'lowstock' && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Items Requiring Restock</h3>
+              <h3 className="mb-4 text-lg font-medium text-gray-900">Items Requiring Restock</h3>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {(inventoryData?.lowStockItems || []).map((item: any) => (
-                  <div key={item.id} className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div key={item.id} className="p-4 border border-red-200 rounded-lg bg-red-50">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
@@ -558,9 +571,9 @@ const InventoryReports: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-2">
-                      <div className="bg-red-200 rounded-full h-2">
+                      <div className="h-2 bg-red-200 rounded-full">
                         <div 
-                          className="bg-red-600 h-2 rounded-full" 
+                          className="h-2 bg-red-600 rounded-full" 
                           style={{ 
                             width: `${Math.min((item.stock / item.reorderLevel) * 100, 100)}%` 
                           }}
@@ -575,28 +588,28 @@ const InventoryReports: React.FC = () => {
 
           {activeTab === 'valuation' && (
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Current Inventory Valuation</h3>
+              <h3 className="mb-4 text-lg font-medium text-gray-900">Current Inventory Valuation</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Price</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Product</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Category</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Stock</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Cost Price</th>
+                      <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Value</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {(inventoryData?.currentStock || []).map((item: any) => (
                       <tr key={item.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">
                           {item.name} <span className="text-gray-500">({item.sku})</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.category?.name || 'N/A'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.stock}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Number(item.costPrice).toFixed(2)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{item.category?.name || 'N/A'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">{item.stock}</td>
+                        <td className="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${Number(item.costPrice).toFixed(2)}</td>
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                           ${(item.stock * Number(item.costPrice)).toFixed(2)}
                         </td>
                       </tr>
