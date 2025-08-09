@@ -175,7 +175,7 @@ router.get('/alerts/low-stock', async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Update product stock and create a purchase batch for stock-in events
+// Update product stock and optionally create a purchase batch for stock-in events
 router.put('/:id/stock', [
   body('stock').isInt({ min: 0 }).withMessage('Stock must be a non-negative integer'),
   body('reason').optional().isLength({ min: 3 }).withMessage('Reason must be at least 3 characters'),
@@ -200,11 +200,9 @@ router.put('/:id/stock', [
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    // If stock is being increased, create a purchase batch for the difference
-    let updatedProduct;
+    // If stock is being increased, optionally create a purchase batch for the difference
     if (stock > product.stock) {
       const addedQty = stock - product.stock;
-      // Use provided unitCost or fallback to product costPrice
       const cost = unitCost ? Number(unitCost) : Number(product.costPrice);
       await prisma.productPurchaseBatch.create({
         data: {
@@ -218,26 +216,10 @@ router.put('/:id/stock', [
       });
     }
 
-    // Always recalculate availableQuantities and stock from batches after restock
-    // (1) Update stock field for UI, but real values will be recalculated below
-    await prisma.product.update({
+    // Directly update the stock value (no availableQuantities logic)
+    const updatedProduct = await prisma.product.update({
       where: { id },
       data: { stock },
-    });
-
-    // (2) Recalculate availableQuantities and stock from batches
-    const batches = await prisma.productPurchaseBatch.findMany({ where: { productId: id } });
-    const totalAvailable = batches.reduce((sum, b) => sum + (b.remaining || 0), 0);
-    let newStock = stock;
-    if (product.stockType === 'raw_material' && product.measurementValue && product.measurementValue > 0) {
-      newStock = Math.max(0, Math.floor(totalAvailable / product.measurementValue));
-    }
-    updatedProduct = await prisma.product.update({
-      where: { id },
-      data: {
-        availableQuantities: totalAvailable,
-        stock: newStock
-      },
       include: {
         category: true,
         supplier: true
@@ -250,8 +232,6 @@ router.put('/:id/stock', [
       await triggerRestockAlert(req.user.id, updatedProduct.id, updatedProduct.name, updatedProduct.stock, updatedProduct.reorderLevel);
     }
 
-    // In a real application, you might want to log stock movements
-    // This could be stored in a separate StockMovement table
     console.log(`Stock updated for product ${product.name}: ${product.stock} -> ${stock}. Reason: ${reason || 'Manual adjustment'}`);
 
     return res.json(updatedProduct);

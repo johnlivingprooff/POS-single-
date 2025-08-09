@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { usePostMutationRefresh } from '../../../hooks/useRealTimeRefresh';
+import { apiFetch } from '../../../lib/api-utils';
 
 export default function RestockForm({ productId, onClose, onSuccess }: { productId: string; onClose: () => void; onSuccess?: () => void }) {
   const [quantity, setQuantity] = useState(1);
@@ -11,11 +12,10 @@ export default function RestockForm({ productId, onClose, onSuccess }: { product
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await fetch(`/api/inventory/${productId}/stock`, {
+      const res = await apiFetch(`/inventory/${productId}/stock`, token, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(data)
       });
