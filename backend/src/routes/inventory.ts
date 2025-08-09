@@ -216,13 +216,13 @@ router.put('/:id/stock', [
       });
     }
 
-    // Directly update the stock value (no availableQuantities logic)
+    // Increment the stock value by the provided amount (additive restock)
     const updatedProduct = await prisma.product.update({
       where: { id },
-      data: { stock },
+      data: { stock: { increment: stock } },
       include: {
-        category: true,
-        supplier: true
+      category: true,
+      supplier: true
       }
     });
 
