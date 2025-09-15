@@ -107,21 +107,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-            {isFG && (
-        <div className="p-2 mb-2 text-xs text-red-700 rounded bg-red-50">
-          <b>Direct creation of finished goods is disabled.</b><br />
-          Please use the BOM workflow to create finished goods products. This form is for raw materials and assets only.
+    <form onSubmit={handleSubmit} className="mobile-form-group">
+      {isFG && (
+        <div className="mobile-card bg-red-50 border-red-200">
+          <p className="text-xs text-red-700">
+            <b>Direct creation of finished goods is disabled.</b><br />
+            Please use the BOM workflow to create finished goods products. This form is for raw materials and assets only.
+          </p>
         </div>
       )}
       <div>
         <label className="block text-sm font-medium text-gray-700">Name</label>
-        <input name="name" value={form.name} onChange={handleChange} required className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md" disabled={isFG} />
+        <input name="name" value={form.name} onChange={handleChange} required className="mobile-input" disabled={isFG} />
       </div>
-            {!isFG && (
+      {!isFG && (
         <div>
           <label className="block text-sm font-medium text-gray-700">Product Type</label>
-          <select name="stockType" value={form.stockType} onChange={handleChange} className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md">
+          <select name="stockType" value={form.stockType} onChange={handleChange} className="mobile-input">
             <option value="raw_material">Current Asset</option>
             {/* <option value="consumable">Consumable</option> */}
             <option value="asset_equipment">Fixed Asset</option>
@@ -130,7 +132,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
       )}
       <div>
         <label className="block text-sm font-medium text-gray-700">SKU</label>
-        <input name="sku" value={form.sku} onChange={handleChange} required className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md" disabled={isEditRawMaterial} />
+        <input name="sku" value={form.sku} onChange={handleChange} required className="mobile-input" disabled={isEditRawMaterial} />
       </div>
       {!isEditRawMaterial && (
         <div>
@@ -141,7 +143,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
             value={form.costPrice}
             onChange={handleChange}
             required
-            className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+            className="mobile-input"
             disabled={isFG && !form.pricingOverride}
           />
           {isFG && (
@@ -163,7 +165,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
               value={form.stock}
               onChange={handleChange}
               required
-              className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+              className="mobile-input"
               disabled={isEdit}
             />
             {isEdit && (
@@ -172,15 +174,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
           </div>
           {/* Measurement fields for raw materials only */}
           {form.stockType === 'raw_material' && (
-            <div className="flex gap-2">
-              <div className="flex-1">
+            <div className="mobile-grid-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Measurement Type</label>
                 <select
                   name="measurementType"
                   value={form.measurementType}
                   onChange={handleChange}
                   required
-                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+                  className="mobile-input"
                 >
                   <option value="">Select unit...</option>
                   <option value="grams">Grams (g)</option>
@@ -191,7 +193,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
                   <option value="other">Other</option>
                 </select>
               </div>
-              <div className="flex-1">
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Measurement Value</label>
                 <input
                   name="measurementValue"
@@ -199,7 +201,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
                   value={form.measurementValue}
                   onChange={handleChange}
                   required
-                  className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+                  className="mobile-input"
                   min={1}
                 />
               </div>
@@ -213,7 +215,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
           name="categoryId"
           value={form.categoryId}
           onChange={handleChange}
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+          className="mobile-input"
           disabled={categoriesLoading}
         >
           <option value="">Select category...</option>
@@ -222,21 +224,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ onSubmit, onCancel, loading, 
           ))}
         </select>
       </div>
-            {!isFG && (
+      {!isFG && (
         <div>
           <label className="block text-sm font-medium text-gray-700">Supplier</label>
           <SupplierSelect value={form.supplierId} onChange={val => setForm(f => ({ ...f, supplierId: val }))} />
         </div>
       )}
-            {!isFG && (
+      {!isFG && (
         <div>
           <label className="block text-sm font-medium text-gray-700">Reorder Level</label>
-          <input name="reorderLevel" type="number" value={form.reorderLevel} onChange={handleChange} className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md" />
+          <input name="reorderLevel" type="number" value={form.reorderLevel} onChange={handleChange} className="mobile-input" />
         </div>
       )}
-      <div className="flex justify-end space-x-2">
-        <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md">Cancel</button>
-        <button type="submit" disabled={loading} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-2">
+        <button type="button" onClick={onCancel} className="mobile-button bg-gray-200 text-gray-700 hover:bg-gray-300">
+          Cancel
+        </button>
+        <button type="submit" disabled={loading} className="mobile-button">
           {loading ? 'Saving...' : 'Save Product'}
         </button>
       </div>

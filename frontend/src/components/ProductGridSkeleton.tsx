@@ -3,7 +3,7 @@ import Skeleton from '../ui/Skeleton';
 
 interface ProductGridSkeletonProps {
   count?: number;
-  columns?: 'sm' | 'md' | 'lg' | 'xl';
+  columns?: 'sm' | 'md' | 'lg' | 'xl' | 'mobile';
 }
 
 const ProductGridSkeleton: React.FC<ProductGridSkeletonProps> = ({ 
@@ -14,7 +14,8 @@ const ProductGridSkeleton: React.FC<ProductGridSkeletonProps> = ({
     sm: 'grid-cols-1 md:grid-cols-2',
     md: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     lg: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-    xl: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+    xl: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5',
+    mobile: 'grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
   };
 
   return (

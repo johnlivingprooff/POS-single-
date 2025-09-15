@@ -13,7 +13,7 @@ const FormSkeleton: React.FC<FormSkeletonProps> = ({
   showTitle = true
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="mobile-form-group">
       {showTitle && (
         <Skeleton className="h-6 w-1/3 mb-6" />
       )}
@@ -21,13 +21,13 @@ const FormSkeleton: React.FC<FormSkeletonProps> = ({
       {Array.from({ length: fields }).map((_, index) => (
         <div key={index} className="space-y-2">
           <Skeleton className="h-4 w-1/4" />
-          <Skeleton className="h-10 w-full" variant="rectangular" />
+          <Skeleton className="h-10 w-full mobile-skeleton" variant="rectangular" />
         </div>
       ))}
       
-      <div className="flex justify-end space-x-2 pt-4">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-2 pt-4">
         {Array.from({ length: buttons }).map((_, index) => (
-          <Skeleton key={index} className="h-10 w-20" variant="rectangular" />
+          <Skeleton key={index} className="h-10 w-full sm:w-20 mobile-skeleton" variant="rectangular" />
         ))}
       </div>
     </div>

@@ -28,18 +28,18 @@ const TableSkeleton: React.FC<TableSkeletonProps> = ({
     cellWidths[index] || defaultCellWidths[index % defaultCellWidths.length] || 'w-16';
 
   return (
-    <div className="overflow-x-auto">
+    <div className="mobile-table">
       <table className="min-w-full divide-y divide-gray-200">
         {showHeader && (
           <thead className="bg-gray-50">
             <tr>
               {Array.from({ length: columns }).map((_, i) => (
-                <th key={i} className="px-6 py-3 text-left">
+                <th key={i} className="px-4 py-3 text-left sm:px-6">
                   <Skeleton className={`h-4 ${getHeaderWidth(i)}`} />
                 </th>
               ))}
               {actions && (
-                <th className="px-6 py-3 text-left">
+                <th className="px-4 py-3 text-left sm:px-6">
                   <Skeleton className="h-4 w-16" />
                 </th>
               )}
@@ -50,7 +50,7 @@ const TableSkeleton: React.FC<TableSkeletonProps> = ({
           {Array.from({ length: rows }).map((_, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-gray-50">
               {Array.from({ length: columns }).map((_, colIndex) => (
-                <td key={colIndex} className="px-6 py-4 whitespace-nowrap">
+                <td key={colIndex} className="px-4 py-4 whitespace-nowrap sm:px-6">
                   {colIndex === 0 ? (
                     // First column often has more complex content (name + details)
                     <div className="flex items-center">
@@ -66,7 +66,7 @@ const TableSkeleton: React.FC<TableSkeletonProps> = ({
                 </td>
               ))}
               {actions && (
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap sm:px-6">
                   <div className="flex space-x-2">
                     <Skeleton variant="circular" className="w-4 h-4" />
                     <Skeleton variant="circular" className="w-4 h-4" />

@@ -18,9 +18,10 @@ import {
 
 interface SidebarProps {
   collapsed: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, onClose }) => {
   const { user } = useAuthStore();
   
   // Define all navigation items
@@ -45,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
 
   return (
     <div
-      className={`flex flex-col bg-white shadow-lg transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}
+      className={`flex flex-col h-full bg-white shadow-lg transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}
       style={{ minWidth: collapsed ? '5rem' : '16rem' }}
     >
       <div className="flex items-center h-16 px-4 bg-primary text-primary-foreground">
@@ -94,7 +95,8 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed }) => {
         ))}
       </nav>
 
-      <div className="p-4 border-t">
+      {/* User Profile Section - Sticks to bottom */}
+      <div className="p-4 mt-auto bg-white border-t">
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary">

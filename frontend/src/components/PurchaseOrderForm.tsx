@@ -62,13 +62,13 @@ export default function PurchaseOrderForm({ onSubmit, onCancel, loading }: Purch
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="mobile-form-group">
       <div>
         <label className="block text-sm font-medium text-gray-700">Supplier</label>
         <select
           value={supplierId}
           onChange={e => setSupplierId(e.target.value)}
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+          className="mobile-input"
           required
         >
           <option value="">Select supplier...</option>
@@ -82,7 +82,7 @@ export default function PurchaseOrderForm({ onSubmit, onCancel, loading }: Purch
         <select
           value={productId}
           onChange={e => setProductId(e.target.value)}
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+          className="mobile-input"
           required
         >
           <option value="">Select product...</option>
@@ -91,28 +91,30 @@ export default function PurchaseOrderForm({ onSubmit, onCancel, loading }: Purch
           ))}
         </select>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Quantity</label>
-        <input
-          type="number"
-          min={1}
-          value={quantity}
-          onChange={e => setQuantity(Number(e.target.value))}
-          required
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Cost Price</label>
-        <input
-          type="number"
-          min={0}
-          step="0.01"
-          value={costPrice}
-          onChange={e => setCostPrice(Number(e.target.value))}
-          required
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
-        />
+      <div className="mobile-grid-2">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Quantity</label>
+          <input
+            type="number"
+            min={1}
+            value={quantity}
+            onChange={e => setQuantity(Number(e.target.value))}
+            required
+            className="mobile-input"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Cost Price</label>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={costPrice}
+            onChange={e => setCostPrice(Number(e.target.value))}
+            required
+            className="mobile-input"
+          />
+        </div>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700">Expected Delivery</label>
@@ -121,10 +123,10 @@ export default function PurchaseOrderForm({ onSubmit, onCancel, loading }: Purch
           value={expectedDelivery}
           onChange={e => setExpectedDelivery(e.target.value)}
           required
-          className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md"
+          className="mobile-input"
         />
       </div>
-      <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+      <div className="mobile-card bg-gray-50 border-gray-200">
         <label className="flex items-start space-x-3">
           <input
             type="checkbox"
@@ -137,17 +139,19 @@ export default function PurchaseOrderForm({ onSubmit, onCancel, loading }: Purch
               Auto-confirm delivery (update inventory immediately)
             </span>
             <p className="mt-1 text-xs text-gray-600">
-              {autoConfirm 
-                ? "✅ Items will be marked as received and added to inventory immediately" 
+              {autoConfirm
+                ? "✅ Items will be marked as received and added to inventory immediately"
                 : "⏰ Order will be created as 'pending' - confirm delivery later to update inventory"
               }
             </p>
           </div>
         </label>
       </div>
-      <div className="flex justify-end space-x-2">
-        <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md">Cancel</button>
-        <button type="submit" disabled={loading} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-2">
+        <button type="button" onClick={onCancel} className="mobile-button bg-gray-200 text-gray-700 hover:bg-gray-300">
+          Cancel
+        </button>
+        <button type="submit" disabled={loading} className="mobile-button">
           {loading ? 'Submitting...' : 'Create Order'}
         </button>
       </div>

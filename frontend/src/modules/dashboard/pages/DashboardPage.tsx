@@ -46,7 +46,7 @@ const DashboardPage: React.FC = () => {
     const numAmount = typeof amount === 'number' ? amount : Number(amount) || 0;
     return numAmount.toLocaleString(undefined, { 
       style: 'currency', 
-      currency: currencyData?.currency || 'USD',
+      currency: currency || 'USD', // Use the currency state that's updated from currencyData
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
@@ -166,24 +166,28 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Hello, {user?.name}</p>
+      <div className="mobile-section">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="mobile-heading">Dashboard</h1>
+          <p className="text-gray-600 text-sm lg:text-base">Hello, {user?.name}</p>
         </div>
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+        {/* Stats Grid - Mobile Optimized */}
+        <div className="mobile-dashboard-grid">
           {statsLoading || invLoading || custLoading ? (
             <DashboardSkeleton />
           ) : statsError || invError || custError ? (
-            <div className="col-span-4 py-8 text-center text-gray-500">
-              {statsErrObj && (statsErrObj as any).status === 404
-                ? 'Nothing found in the database.'
-                : 'Failed to load stats.'}
+            <div className="mobile-empty-state col-span-full">
+              <div className="mobile-empty-icon">📊</div>
+              <div className="mobile-empty-title">
+                {statsErrObj && (statsErrObj as any).status === 404
+                  ? 'Nothing found in the database.'
+                  : 'Failed to load stats.'}
+              </div>
             </div>
           ) : (
             <>
-              <div className="p-6 bg-white border rounded-lg shadow-sm">
+              <div className="mobile-dashboard-card">
                 <div className="flex items-center">
                   <DollarSign className="w-8 h-8 text-green-600" />
                   <div className="ml-4">
@@ -194,7 +198,8 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-6 bg-white border rounded-lg shadow-sm">
+
+              <div className="mobile-dashboard-card">
                 <div className="flex items-center">
                   <ShoppingCart className="w-8 h-8 text-blue-600" />
                   <div className="ml-4">
@@ -203,7 +208,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-6 bg-white border rounded-lg shadow-sm">
+              <div className="mobile-dashboard-card">
                 <div className="flex items-center">
                   <Package className="w-8 h-8 text-orange-600" />
                   <div className="ml-4">
@@ -212,7 +217,8 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="p-6 bg-white border rounded-lg shadow-sm">
+
+              <div className="mobile-dashboard-card">
                 <div className="flex items-center">
                   <Users className="w-8 h-8 text-purple-600" />
                   <div className="ml-4">
@@ -225,23 +231,32 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Quick Actions - Mobile Optimized */}
+        <div className="mobile-grid-3">
           <div className="lg:col-span-2">
-            <div className="p-6 bg-white border rounded-lg shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-gray-900">Recent Transactions</h2>
+            <div className="mobile-card">
+              <h2 className="mobile-subheading mb-4">Recent Transactions</h2>
               {txLoading ? (
-                <div className="py-8 text-center text-gray-500">Loading transactions...</div>
+                <div className="mobile-empty-state py-8">
+                  <div className="mobile-empty-icon">⏳</div>
+                  <div className="mobile-empty-title">Loading transactions...</div>
+                </div>
               ) : txError ? (
-                <div className="py-8 text-center text-gray-500">
-                  {txErrObj && (txErrObj as any).status === 404
-                    ? 'Nothing found in the database.'
-                    : 'Failed to load transactions.'}
+                <div className="mobile-empty-state py-8">
+                  <div className="mobile-empty-icon">⚠️</div>
+                  <div className="mobile-empty-title">
+                    {txErrObj && (txErrObj as any).status === 404
+                      ? 'Nothing found in the database.'
+                      : 'Failed to load transactions.'}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {recentTransactions?.length === 0 ? (
-                    <div className="text-gray-500">No recent transactions.</div>
+                    <div className="mobile-empty-state py-4">
+                      <div className="mobile-empty-icon">📄</div>
+                      <div className="mobile-empty-title">No recent transactions.</div>
+                    </div>
                   ) : (
                     recentTransactions?.map((transaction: any) => (
                       <div key={transaction.id} className="flex items-center justify-between py-2">
@@ -263,31 +278,17 @@ const DashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="p-6 bg-white border rounded-lg shadow-sm">
-              <h3 className="mb-4 text-lg font-semibold text-gray-900">Quick Actions</h3>
+            <div className="mobile-card">
+              <h3 className="mobile-subheading mb-4">Quick Actions</h3>
               <div className="space-y-3">
                 <button
-                  className="w-full px-4 py-2 transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="mobile-button w-full"
                   onClick={() => navigate('/pos')}
                 >
                   Open POS Terminal
                 </button>
-                {/* {canCreateProducts && (
-                  <button
-                    className="w-full px-4 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200"
-                    onClick={() => setShowAddProductModal(true)}
-                  >
-                    Add New Product
-                  </button>
-                )} */}
-      {/* Modal for Add New Product */}
-      {canCreateProducts && (
-        <Modal open={showAddProductModal} onClose={() => setShowAddProductModal(false)} title="Add New Product">
-          <ProductForm onSubmit={handleAddProduct} onCancel={() => setShowAddProductModal(false)} loading={addProductLoading} />
-        </Modal>
-      )}
                 <button
-                  className="w-full px-4 py-2 text-gray-700 transition-colors bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="mobile-button w-full bg-gray-600 hover:bg-gray-700"
                   onClick={() => navigate('/reports')}
                 >
                   View Reports
@@ -295,20 +296,20 @@ const DashboardPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-6 bg-white border rounded-lg shadow-sm">
+            <div className="mobile-card">
               <div className="flex items-center mb-4">
                 <AlertCircle className="w-5 h-5 mr-2 text-orange-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Alerts</h3>
+                <h3 className="mobile-subheading">Alerts</h3>
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">{inventoryStats?.lowStockProducts || 0} items are running low on stock</p>
                 <p className="text-sm text-gray-600">
                   {inventoryStats?.pendingProcurements ?? 0} pending supplier orders{' '}
                   <button
-                  className="ml-2 text-xs text-blue-600 underline hover:text-blue-800"
-                  onClick={() => navigate('/suppliers?tab=procurement')}
+                    className="ml-2 text-xs text-blue-600 underline hover:text-blue-800"
+                    onClick={() => navigate('/suppliers?tab=procurement')}
                   >
-                  View
+                    View
                   </button>
                 </p>
               </div>
@@ -316,9 +317,16 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Add New Product */}
+      {canCreateProducts && (
+        <Modal open={showAddProductModal} onClose={() => setShowAddProductModal(false)} title="Add New Product">
+          <ProductForm onSubmit={handleAddProduct} onCancel={() => setShowAddProductModal(false)} loading={addProductLoading} />
+        </Modal>
+      )}
     </Suspense>
   );
-}
+};
 
 
 export default DashboardPage;

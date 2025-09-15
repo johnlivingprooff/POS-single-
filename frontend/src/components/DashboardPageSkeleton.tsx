@@ -3,14 +3,14 @@ import Skeleton from '../ui/Skeleton';
 
 const DashboardPageSkeleton: React.FC = () => {
   return (
-    <div className="space-y-6">
+    <div className="mobile-section">
       {/* Page Title */}
       <Skeleton className="h-8 w-48" />
       
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="mobile-dashboard-grid">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="p-6 bg-white border rounded-lg shadow-sm">
+          <div key={index} className="mobile-dashboard-card">
             <div className="flex items-center">
               <Skeleton variant="circular" className="w-12 h-12 mr-4" />
               <div className="flex-1">
@@ -23,17 +23,17 @@ const DashboardPageSkeleton: React.FC = () => {
       </div>
       
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="mobile-grid-3">
         {/* Left Column - Charts/Graphs */}
         <div className="lg:col-span-2 space-y-6">
           {/* Chart Card */}
-          <div className="p-6 bg-white border rounded-lg shadow-sm">
+          <div className="mobile-dashboard-card">
             <Skeleton className="h-6 w-32 mb-4" />
             <Skeleton className="h-64 w-full" variant="rectangular" />
           </div>
           
           {/* Another Chart/Table */}
-          <div className="p-6 bg-white border rounded-lg shadow-sm">
+          <div className="mobile-dashboard-card">
             <Skeleton className="h-6 w-40 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
@@ -53,7 +53,7 @@ const DashboardPageSkeleton: React.FC = () => {
         {/* Right Column - Sidebar Content */}
         <div className="space-y-6">
           {/* Recent Activity */}
-          <div className="p-6 bg-white border rounded-lg shadow-sm">
+          <div className="mobile-dashboard-card">
             <Skeleton className="h-6 w-28 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, index) => (
@@ -66,7 +66,7 @@ const DashboardPageSkeleton: React.FC = () => {
           </div>
           
           {/* Quick Actions */}
-          <div className="p-6 bg-white border rounded-lg shadow-sm">
+          <div className="mobile-dashboard-card">
             <Skeleton className="h-6 w-32 mb-4" />
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, index) => (
@@ -76,7 +76,7 @@ const DashboardPageSkeleton: React.FC = () => {
           </div>
           
           {/* Alerts */}
-          <div className="p-6 bg-white border rounded-lg shadow-sm">
+          <div className="mobile-dashboard-card">
             <div className="flex items-center mb-4">
               <Skeleton variant="circular" className="w-5 h-5 mr-2" />
               <Skeleton className="h-6 w-20" />

@@ -334,26 +334,17 @@ const POSPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col h-full lg:flex-row">
       {/* Product Selection Area */}
-      <div className="flex-1 p-6 bg-gray-50">
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">POS Terminal</h1>
+      <div className="flex-1 order-2 p-4 lg:p-6 bg-gray-50 lg:order-1">
+        <h1 className="mb-4 text-xl font-bold text-gray-900 lg:mb-6 lg:text-2xl">POS Terminal</h1>
         {/* Barcode Scanner */}
-        <div className="p-4 mb-6 bg-white border rounded-lg shadow-sm">
-          <form onSubmit={handleBarcodeScan} className="flex space-x-4">
+        <div className="p-3 mb-4 bg-white border rounded-lg shadow-sm lg:p-4 lg:mb-6">
+          <form onSubmit={handleBarcodeScan} className="flex flex-col gap-3 sm:flex-row lg:gap-4">
             <div className="flex-1">
               <label htmlFor="barcode" className="block mb-2 text-sm font-medium text-gray-700">
                 Search Product by Name
               </label>
-              {/* <input
-                id="barcode"
-                type="text"
-                value={barcode}
-                onChange={(e) => setBarcode(e.target.value)}
-                className="w-full px-3 py-2 mb-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
-                placeholder="Scan or type product code"
-                autoFocus
-              /> */}
               <input
                 type="text"
                 value={searchTerm}
@@ -362,20 +353,13 @@ const POSPage: React.FC = () => {
                 placeholder="Search by product name or SKU"
               />
             </div>
-            {/* <button
-              type="submit"
-              className="flex items-center px-4 py-2 transition-colors rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              <Scan className="w-4 h-4 mr-2" />
-              Add
-            </button> */}
           </form>
         </div>
         {/* Filter Pills */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
+            className={`px-3 lg:px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
               activeFilter === 'all'
                 ? 'bg-primary text-white border-primary'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -383,26 +367,6 @@ const POSPage: React.FC = () => {
           >
             All Products
           </button>
-          {/* <button
-            onClick={() => setActiveFilter('finished_good')}
-            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
-              activeFilter === 'finished_good'
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Finished Goods
-          </button>
-          <button
-            onClick={() => setActiveFilter('raw_material')}
-            className={`px-4 py-1 text-sm font-medium border rounded-full transition-colors ${
-              activeFilter === 'raw_material'
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            Raw Materials
-          </button> */}
         </div>
         {/* Product Grid */}
         {productsLoading ? (
@@ -420,21 +384,21 @@ const POSPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-4">
             {displayedProducts.map((product: any) => (
-              <div key={product.id} className="p-4 transition-shadow bg-white border rounded-lg shadow-sm hover:shadow-md">
-                <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                <p className="mb-2 text-sm text-gray-600">SKU: {product.sku}</p>
+              <div key={product.id} className="p-3 transition-shadow bg-white border rounded-lg shadow-sm lg:p-4 hover:shadow-md">
+                <h3 className="text-sm font-semibold text-gray-900 lg:text-base">{product.name}</h3>
+                <p className="mb-2 text-xs text-gray-600 lg:text-sm">SKU: {product.sku}</p>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-lg font-bold text-primary">{currency}{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-base font-bold lg:text-lg text-primary">{currency}{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-xs font-medium text-gray-500 lg:text-sm">
                     {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
                   </p>
                 </div>
                 <button
                   onClick={() => addToCart(product)}
                   disabled={product.stock <= 0}
-                  className={`w-full px-4 py-2 transition-colors rounded-md ${
+                  className={`w-full px-3 lg:px-4 py-2 text-sm lg:text-base transition-colors rounded-md ${
                     product.stock <= 0
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -449,14 +413,14 @@ const POSPage: React.FC = () => {
       </div>
 
       {/* Shopping Cart */}
-      <div className="flex flex-col p-6 bg-white border-l w-96">
-        <div className="flex items-center mb-6">
-          <ShoppingCart className="w-6 h-6 mr-2" />
-          <h2 className="text-xl font-bold text-gray-900">Cart ({cart.length})</h2>
+      <div className="order-1 w-full p-4 bg-white border-t lg:w-96 lg:flex-shrink-0 lg:p-6 lg:border-t-0 lg:border-l lg:order-2">
+        <div className="flex items-center mb-4 lg:mb-6">
+          <ShoppingCart className="w-5 h-5 mr-2 lg:w-6 lg:h-6" />
+          <h2 className="text-lg font-bold text-gray-900 lg:text-xl">Cart ({cart.length})</h2>
         </div>
 
         {/* Customer Info */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <label htmlFor="customer" className="block mb-2 text-sm font-medium text-gray-700">
             Customer (Optional)
           </label>
@@ -464,7 +428,7 @@ const POSPage: React.FC = () => {
             id="customer"
             value={selectedCustomerId}
             onChange={e => setSelectedCustomerId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary lg:text-base"
           >
             <option value="">Walk-in Customer</option>
             {customers.map((customer: any) => (
@@ -476,9 +440,9 @@ const POSPage: React.FC = () => {
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 mb-6 space-y-4 overflow-y-auto">
+        <div className="flex-1 mb-4 space-y-3 overflow-y-auto lg:mb-6 lg:space-y-4 max-h-60 lg:max-h-none">
           {cart.length === 0 ? (
-            <p className="py-8 text-center text-gray-500">Cart is empty</p>
+            <p className="py-6 text-sm text-center text-gray-500 lg:py-8 lg:text-base">Cart is empty</p>
           ) : (
             cart.map((item) => {
               // Find the corresponding product to get current stock
@@ -487,11 +451,11 @@ const POSPage: React.FC = () => {
               const isAtMaxQuantity = item.quantity >= currentStock;
               
               return (
-              <div key={item.id} className="p-4 border rounded-lg">
-                <h3 className="font-semibold text-gray-900">{item.name}</h3>
-                <p className="text-sm text-gray-600">SKU: {item.sku}</p>
+              <div key={item.id} className="p-3 border rounded-lg lg:p-4">
+                <h3 className="text-sm font-semibold text-gray-900 lg:text-base">{item.name}</h3>
+                <p className="text-xs text-gray-600 lg:text-sm">SKU: {item.sku}</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-lg font-bold text-primary">{currency}{Number(item.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-base font-bold lg:text-lg text-primary">{currency}{Number(item.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-gray-500">{currentStock} available</p>
                 </div>
                 
@@ -501,9 +465,9 @@ const POSPage: React.FC = () => {
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="p-1 text-gray-600 hover:text-gray-900"
                     >
-                      <Minus className="w-4 h-4" />
+                      <Minus className="w-3 h-3 lg:w-4 lg:h-4" />
                     </button>
-                    <span className="px-3 font-medium">{item.quantity}</span>
+                    <span className="px-2 text-sm font-medium lg:px-3 lg:text-base">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={isAtMaxQuantity}
@@ -514,19 +478,19 @@ const POSPage: React.FC = () => {
                       }`}
                       title={isAtMaxQuantity ? 'Maximum stock reached' : 'Increase quantity'}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-3 h-3 lg:w-4 lg:h-4" />
                     </button>
                   </div>
                   <button
                     onClick={() => removeFromCart(item.id)}
-                    className="p-2 text-red-600 hover:text-red-800"
+                    className="p-1 text-red-600 lg:p-2 hover:text-red-800"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 lg:w-4 lg:h-4" />
                   </button>
                 </div>
                 
                 <div className="mt-2 text-right">
-                  <p className="font-bold">
+                  <p className="text-sm font-bold lg:text-base">
                     Subtotal: {currency}{(item.costPrice * item.quantity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   {isAtMaxQuantity && (
@@ -541,7 +505,7 @@ const POSPage: React.FC = () => {
 
         {/* Total and Checkout */}
         {cart.length > 0 && (
-          <div className="pt-4 space-y-4 border-t">
+          <div className="pt-3 space-y-3 border-t lg:pt-4 lg:space-y-4">
             {/* Discount Input */}
             <div>
               <label htmlFor="discount" className="block mb-2 text-sm font-medium text-gray-700">
@@ -555,34 +519,34 @@ const POSPage: React.FC = () => {
                 step="0.1"
                 value={discountPercentage}
                 onChange={(e) => setDiscountPercentage(Math.max(0, Math.min(100, parseFloat(e.target.value) || 0)))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary lg:text-base"
                 placeholder="Enter discount percentage"
               />
             </div>
 
             {/* Order Summary */}
-            <div className="p-4 space-y-2 rounded-lg bg-gray-50">
-              <div className="flex justify-between text-sm">
+            <div className="p-3 space-y-2 rounded-lg lg:p-4 bg-gray-50">
+              <div className="flex justify-between text-xs lg:text-sm">
                 <span>Subtotal:</span>
                 <span>{currency}{getSubtotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               
               {discountPercentage > 0 && (
-                <div className="flex justify-between text-sm text-red-600">
+                <div className="flex justify-between text-xs text-red-600 lg:text-sm">
                   <span>Discount ({discountPercentage}%):</span>
                   <span>-{currency}{getDiscountAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}
               
               {taxSettings.taxEnabled && (
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-xs text-gray-600 lg:text-sm">
                   <span>{taxSettings.taxName} ({taxSettings.taxPercentage}% {taxSettings.taxType}):</span>
                   <span>{taxSettings.taxType === 'inclusive' ? 'included' : `${currency}${getTaxAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</span>
                 </div>
               )}
               
               <div className="pt-2 border-t border-gray-300">
-                <div className="flex justify-between text-lg font-bold">
+                <div className="flex justify-between text-base font-bold lg:text-lg">
                   <span>Total:</span>
                   <span>{currency}{getTotal().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
@@ -592,7 +556,7 @@ const POSPage: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={handleShowPaymentModal}
-                className="flex items-center justify-center w-full px-4 py-3 text-white transition-colors bg-green-600 rounded-md hover:bg-green-700"
+                className="flex items-center justify-center w-full px-4 py-3 text-sm text-white transition-colors bg-green-600 rounded-md hover:bg-green-700 lg:text-base"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Process Payment
@@ -640,7 +604,7 @@ const POSPage: React.FC = () => {
               
               <button
                 onClick={() => setCart([])}
-                className="w-full px-4 py-2 text-gray-700 transition-colors bg-gray-200 rounded-md hover:bg-gray-300"
+                className="w-full px-3 py-2 text-sm text-gray-700 transition-colors bg-gray-200 rounded-md lg:px-4 hover:bg-gray-300 lg:text-base"
               >
                 Clear Cart
               </button>

@@ -165,3 +165,163 @@
     --tw-ring-offset-color: hsl(var(--background));
   }
 }
+
+/* Mobile-First Responsive Design */
+@layer utilities {
+  /* Mobile Navigation */
+  .mobile-nav-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden;
+  }
+  
+  .mobile-sidebar {
+    @apply fixed left-0 top-0 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 lg:hidden;
+  }
+  
+  .mobile-sidebar-closed {
+    @apply -translate-x-full;
+  }
+  
+  .mobile-sidebar-open {
+    @apply translate-x-0;
+  }
+  
+  /* Mobile Layout Adjustments */
+  .mobile-container {
+    @apply px-4 py-4 mx-auto max-w-full sm:px-6 lg:px-8;
+  }
+  
+  .mobile-card {
+    @apply bg-white rounded-lg shadow-sm border p-4 mx-2 mb-4 sm:mx-0;
+  }
+  
+  /* Mobile Table Improvements */
+  .mobile-table {
+    @apply block w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0;
+  }
+  
+  .mobile-table table {
+    @apply min-w-full;
+  }
+  
+  /* Mobile Form Improvements */
+  .mobile-form-group {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .mobile-input {
+    @apply w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent sm:text-sm;
+  }
+  
+  .mobile-button {
+    @apply w-full px-4 py-3 text-base font-medium text-white bg-primary rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto sm:px-6 sm:py-2 sm:text-sm;
+  }
+  
+  /* Mobile Grid Layouts */
+  .mobile-grid-2 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+  }
+  
+  .mobile-grid-3 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .mobile-grid-4 {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  /* Mobile Spacing */
+  .mobile-section {
+    @apply py-6 px-4 sm:py-8 sm:px-6 lg:py-12 lg:px-8;
+  }
+  
+  /* Mobile Typography */
+  .mobile-heading {
+    @apply text-2xl font-bold text-gray-900 sm:text-3xl;
+  }
+  
+  .mobile-subheading {
+    @apply text-lg font-semibold text-gray-700 sm:text-xl;
+  }
+  
+  /* Mobile POS Specific */
+  .mobile-pos-layout {
+    @apply flex flex-col h-screen bg-gray-50 lg:flex-row;
+  }
+  
+  .mobile-pos-products {
+    @apply flex-1 p-4 overflow-y-auto lg:flex-none lg:w-2/3 lg:p-6;
+  }
+  
+  .mobile-pos-cart {
+    @apply bg-white border-t p-4 lg:flex-none lg:w-1/3 lg:border-t-0 lg:border-l lg:p-6;
+  }
+  
+  .mobile-pos-product-grid {
+    @apply grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6;
+  }
+  
+  .mobile-pos-product-card {
+    @apply bg-white rounded-lg shadow-sm border p-3 hover:shadow-md transition-shadow cursor-pointer;
+  }
+  
+  .mobile-pos-cart-item {
+    @apply flex items-center justify-between py-3 px-2 border-b border-gray-100 last:border-b-0;
+  }
+  
+  /* Mobile Dashboard */
+  .mobile-dashboard-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .mobile-dashboard-card {
+    @apply bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow;
+  }
+  
+  /* Mobile Modal Improvements */
+  .mobile-modal {
+    @apply fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center;
+  }
+  
+  .mobile-modal-content {
+    @apply w-full max-w-md bg-white rounded-t-lg shadow-xl sm:rounded-lg max-h-[90vh] overflow-y-auto;
+  }
+  
+  /* Mobile Search and Filters */
+  .mobile-search-bar {
+    @apply sticky top-0 z-10 bg-white border-b p-4 mb-4 sm:relative sm:top-auto sm:z-auto sm:border-b-0 sm:p-0 sm:mb-6;
+  }
+  
+  .mobile-filter-buttons {
+    @apply flex gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-x-visible sm:pb-0;
+  }
+  
+  .mobile-filter-button {
+    @apply px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+  
+  .mobile-filter-button.active {
+    @apply bg-primary text-white border-primary;
+  }
+  
+  /* Mobile Loading States */
+  .mobile-skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+  
+  /* Mobile Empty States */
+  .mobile-empty-state {
+    @apply flex flex-col items-center justify-center py-12 px-4 text-center;
+  }
+  
+  .mobile-empty-icon {
+    @apply w-16 h-16 text-gray-400 mb-4;
+  }
+  
+  .mobile-empty-title {
+    @apply text-lg font-medium text-gray-900 mb-2;
+  }
+  
+  .mobile-empty-description {
+    @apply text-sm text-gray-500 mb-6;
+  }
+}
