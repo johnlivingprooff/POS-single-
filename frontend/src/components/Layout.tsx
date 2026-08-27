@@ -7,18 +7,18 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [collapsed, setCollapsed] = React.useState(true);
+  const [collapsed, setCollapsed] = React.useState(false);
 
   const handleToggleSidebar = () => {
     setCollapsed((prev) => !prev);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar collapsed={collapsed} />
-      <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex h-screen bg-background">
+      <Sidebar collapsed={collapsed} onToggle={handleToggleSidebar} />
+      <div className="flex flex-col flex-1 overflow-hidden transition-all duration-300">
         <Header onToggleSidebar={handleToggleSidebar} isSidebarCollapsed={collapsed} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-muted/30 p-6 lg:p-8">
           {children}
         </main>
       </div>

@@ -1,59 +1,49 @@
-import React, { useState } from 'react';
+import React from 'react';
 import InventorySettingsSection from './InventorySettingsSection';
 import SalesPricingConfiguration from './SalesPricingConfiguration';
 import CategorySettingsSection from './CategorySettingsSection';
 import GeneralSettingsSection from './GeneralSettingsSection';
 import TaxSettingsSection from './TaxSettingsSection';
-import Skeleton from '../../../ui/Skeleton';  
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs';
 
 const SettingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'general' | 'inventory' | 'sales' | 'tax' | 'categories'>('general');
-
   return (
     <div className="space-y-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="mb-8 text-4xl font-bold text-gray-900">Settings</h1>
-        <div className="flex pb-2 mb-8 space-x-4 border-b">
-          <button
-            className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'general' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            onClick={() => setActiveTab('general')}
-          >
-            General
-          </button>
-          <button
-            className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'inventory' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            onClick={() => setActiveTab('inventory')}
-          >
-            Inventory
-          </button>
-          <button
-            className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'sales' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            onClick={() => setActiveTab('sales')}
-          >
-            Sales
-          </button>
-          <button
-            className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'tax' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            onClick={() => setActiveTab('tax')}
-          >
-            Tax
-          </button>
-          <button
-            className={`px-6 py-2 font-medium rounded-t-md ${activeTab === 'categories' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700'}`}
-            onClick={() => setActiveTab('categories')}
-          >
-            Categories
-          </button>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Settings</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage your store preferences, pricing, and system configuration.
+          </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-8 min-h-[500px]">
-          {activeTab === 'general' && (
-            <GeneralSettingsSection />
-          )}
-          {activeTab === 'inventory' && <InventorySettingsSection />}
-          {activeTab === 'sales' && <SalesPricingConfiguration />}
-          {activeTab === 'tax' && <TaxSettingsSection />}
-          {activeTab === 'categories' && <CategorySettingsSection />}
-        </div>
+
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="flex flex-wrap gap-1">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="tax">Tax</TabsTrigger>
+            <TabsTrigger value="categories">Categories</TabsTrigger>
+          </TabsList>
+
+          <div className="rounded-lg border bg-card p-6 shadow-sm min-h-[500px]">
+            <TabsContent value="general">
+              <GeneralSettingsSection />
+            </TabsContent>
+            <TabsContent value="inventory">
+              <InventorySettingsSection />
+            </TabsContent>
+            <TabsContent value="sales">
+              <SalesPricingConfiguration />
+            </TabsContent>
+            <TabsContent value="tax">
+              <TaxSettingsSection />
+            </TabsContent>
+            <TabsContent value="categories">
+              <CategorySettingsSection />
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
     </div>
   );

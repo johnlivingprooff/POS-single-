@@ -3,6 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../stores/authStore';
 import { useForm } from 'react-hook-form';
 import CurrencySettings from '../components/CurrencySettings';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Button } from '../../../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
 import { apiFetch } from '../../../lib/api-utils';
 
 
@@ -24,9 +28,6 @@ async function updateGeneralSettingsWithAuth(data: any, token: string) {
   return res.json();
 }
 
-const allowedUnits = ['pcs', 'kg', 'g', 'l', 'ml', 'm', 'cm', 'ft', 'custom'];
-const allowedCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'CNY', 'INR', 'custom'];
-
 export default function GeneralSettingsSection() {
   const queryClient = useQueryClient();
   const token = useAuthStore(state => state.token);
@@ -38,7 +39,7 @@ export default function GeneralSettingsSection() {
   const mutation = useMutation((formData: any) => updateGeneralSettingsWithAuth(formData, token!), {
     onSuccess: () => queryClient.invalidateQueries(['generalSettings', token])
   });
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: data || {}
   });
 
@@ -54,43 +55,41 @@ export default function GeneralSettingsSection() {
   if (error) return <div className="text-red-500">Error loading settings</div>;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-lg space-y-6">
-      {/* Unit of Measurement
-      <div>
-        <label className="block mb-1 font-medium">Unit of Measurement</label>
-        <select {...register('unitOfMeasurement', {
-          required: true,
-          validate: v => allowedUnits.includes(v) || 'Invalid unit'
-        })} className="w-full px-2 py-1 border rounded">
-          {allowedUnits.map(u => (
-            <option key={u} value={u}>{u}</option>
-          ))}
-        </select>
-        {errors.unitOfMeasurement && <span className="text-sm text-red-500">{String(errors.unitOfMeasurement.message)}</span>}
-      </div> */}
-      {/* Currency */}
-      <div className="col-span-2">
-        <CurrencySettings />
-      </div>
+    <div className="space-y-6">
+      <CurrencySettings />
 
-      {/* Company Name */}
-      <div>
-        <label className="block mb-1 font-medium">Company Name</label>
-        <input
-          {...register('companyName', { required: false })}
-          placeholder="Company Name"
-          className="w-full px-2 py-1 border rounded"
-        />
-      </div>
-      <button
-        type="submit"
-        className="px-4 py-2 text-white rounded bg-primary disabled:opacity-50"
-        disabled={mutation.isLoading}
-      >
-        {mutation.isLoading ? 'Saving...' : 'Save Settings'}
-      </button>
-      {mutation.isError && <div className="text-red-500">{(mutation.error as Error).message}</div>}
-      {mutation.isSuccess && <div className="text-green-600">Settings updated!</div>}
-    </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>Store Details</CardTitle>
+          <CardDescription>
+            Basic information about your business.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Company Name</Label>
+              <Input
+                id="companyName"
+                {...register('companyName', { required: false })}
+                placeholder="e.g. Habicore Stores Ltd."
+              />
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <Button type="submit" disabled={mutation.isLoading}>
+                {mutation.isLoading ? 'Saving…' : 'Save Settings'}
+              </Button>
+              {mutation.isError && (
+                <span className="text-sm text-red-500">{(mutation.error as Error).message}</span>
+              )}
+              {mutation.isSuccess && (
+                <span className="text-sm text-green-600">Settings updated!</span>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

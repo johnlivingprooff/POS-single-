@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
 import { Alert, AlertDescription } from '../../../components/ui/alert';
+import { Badge } from '../../../components/ui/badge';
 import { useAuthStore } from '../../../stores/authStore';
 import { apiFetch } from '../../../lib/api-utils';
 
@@ -12,9 +13,15 @@ interface Currency {
   region: string;
 }
 
+const REGION_LABELS: Record<string, string> = {
+  global: 'Global Currencies',
+  africa: 'African Currencies',
+};
+
 const CurrencySettings: React.FC = () => {
   const { token } = useAuthStore();
   const [currentCurrency, setCurrentCurrency] = useState<string>('USD');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [availableCurrencies, setAvailableCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -26,10 +33,10 @@ const CurrencySettings: React.FC = () => {
 
   const fetchCurrencySettings = async () => {
     try {
-      // const apiUrl = process.env.VITE_API_URL || '';
       const response = await apiFetch(`/settings/currency`, token);
       const data = await response.json();
       setCurrentCurrency(data.currency);
+      setSelectedCurrency(data.currency);
     } catch (error) {
       console.error('Error fetching currency settings:', error);
     }
@@ -37,7 +44,6 @@ const CurrencySettings: React.FC = () => {
 
   const fetchAvailableCurrencies = async () => {
     try {
-      // const apiUrl = process.env.VITE_API_URL || '';
       const response = await apiFetch(`/settings/currencies`, token);
       const data = await response.json();
       setAvailableCurrencies(data);
@@ -45,6 +51,24 @@ const CurrencySettings: React.FC = () => {
       console.error('Error fetching available currencies:', error);
     }
   };
+
+  // Deduplicate by code and group by region for the dropdown
+  const groupedCurrencies = useMemo(() => {
+    const seen = new Set<string>();
+    const groups: Record<string, Currency[]> = {};
+    for (const currency of availableCurrencies) {
+      if (seen.has(currency.code)) continue;
+      seen.add(currency.code);
+      const region = currency.region || 'global';
+      if (!groups[region]) groups[region] = [];
+      groups[region].push(currency);
+    }
+    return groups;
+  }, [availableCurrencies]);
+
+  const currentInfo = availableCurrencies.find(c => c.code === currentCurrency);
+  const selectedInfo = availableCurrencies.find(c => c.code === selectedCurrency);
+  const isChanged = selectedCurrency !== currentCurrency;
 
   const updateCurrency = async (newCurrency: string) => {
     try {
@@ -60,8 +84,6 @@ const CurrencySettings: React.FC = () => {
       if (response.ok) {
         setCurrentCurrency(newCurrency);
         setMessage({ type: 'success', text: 'Currency updated successfully!' });
-        
-        // Clear message after 3 seconds
         setTimeout(() => setMessage(null), 3000);
       } else {
         throw new Error('Failed to update currency');
@@ -74,27 +96,22 @@ const CurrencySettings: React.FC = () => {
     }
   };
 
-  // Group currencies by region and deduplicate
-  const groupedCurrencies = availableCurrencies.reduce((groups, currency) => {
-    const region = currency.region;
-    if (!groups[region]) {
-      groups[region] = [];
-    }
-    // Check if currency already exists in this region to prevent duplicates
-    const exists = groups[region].some(existing => existing.code === currency.code);
-    if (!exists) {
-      groups[region].push(currency);
-    }
-    return groups;
-  }, {} as Record<string, Currency[]>);
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Currency Settings</CardTitle>
-        <CardDescription>
-          Set the currency for the system. This will be used for all pricing, receipts, and financial reports.
-        </CardDescription>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <CardTitle>Currency</CardTitle>
+            <CardDescription>
+              Choose the currency used for pricing, receipts, and financial reports.
+            </CardDescription>
+          </div>
+          {currentInfo && (
+            <Badge variant="secondary" className="shrink-0 text-sm">
+              {currentInfo.symbol} {currentInfo.code}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {message && (
@@ -103,42 +120,46 @@ const CurrencySettings: React.FC = () => {
           </Alert>
         )}
 
-        <div>
-          <label className="block mb-2 text-sm font-medium">
-            Current Currency: {currentCurrency}
+        <div className="space-y-2">
+          <label htmlFor="currency-select" className="text-sm font-medium">
+            Display currency
           </label>
-          
-          <div className="space-y-4">
+          <select
+            id="currency-select"
+            value={selectedCurrency}
+            onChange={(e) => setSelectedCurrency(e.target.value)}
+            disabled={loading}
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             {Object.entries(groupedCurrencies).map(([region, currencies]) => (
-              <div key={region}>
-                <h4 className="mb-2 text-sm font-medium text-gray-700">{region}</h4>
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
-                  {currencies.map((currency, index) => (
-                    <button
-                      key={`${region}-${currency.code}-${index}`}
-                      onClick={() => updateCurrency(currency.code)}
-                      disabled={loading || currency.code === currentCurrency}
-                      className={`p-3 text-left border rounded-md transition-colors ${
-                        currency.code === currentCurrency
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <div className="font-medium">{currency.code}</div>
-                      <div className="text-sm text-gray-600">{currency.symbol} {currency.name}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <optgroup key={region} label={REGION_LABELS[region] || region}>
+                {currencies.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.code} — {currency.name} ({currency.symbol})
+                  </option>
+                ))}
+              </optgroup>
             ))}
+          </select>
+
+          <div className="flex items-center justify-between pt-1">
+            <p className="text-sm text-muted-foreground">
+              {selectedInfo
+                ? `Selected: ${selectedInfo.name} (${selectedInfo.symbol})`
+                : 'Select a currency'}
+            </p>
+            <Button
+              onClick={() => updateCurrency(selectedCurrency)}
+              disabled={loading || !isChanged}
+            >
+              {loading ? 'Saving…' : 'Update Currency'}
+            </Button>
           </div>
         </div>
 
-        <div className="pt-4 border-t">
-          <p className="text-sm text-gray-600">
-            <strong>Note:</strong> Changing your currency will affect all new transactions, pricing displays, and reports. 
-            Existing transaction history will remain in their original currencies.
-          </p>
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <strong>Note:</strong> Changing the currency affects all new transactions, pricing
+          displays, and reports. Existing transaction history remains in its original currency.
         </div>
       </CardContent>
     </Card>
