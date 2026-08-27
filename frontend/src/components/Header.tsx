@@ -207,11 +207,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarCollapsed }) 
           {/* Notifications */}
           <NotificationBell className="p-2 text-muted-foreground transition-colors hover:text-foreground" />
 
-          {/* Dark Mode Toggle */}
+          {/* Dark Mode Toggle (hidden on small screens; available in user menu) */}
           <button
             onClick={toggleDarkMode}
             className={cn(
-              'p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
+              'hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             )}
             aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -220,12 +220,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarCollapsed }) 
             {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </button>
 
-          {/* Settings (admin only) */}
+          {/* Settings (admin only, hidden on small screens; available in user menu) */}
           {canAccessSettings && (
             <button
               onClick={() => navigate('/settings')}
               className={cn(
-                'p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
+                'hidden sm:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
               )}
               title="Settings"
