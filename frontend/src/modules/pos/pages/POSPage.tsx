@@ -420,21 +420,23 @@ const POSPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(260px,1fr))]">
             {displayedProducts.map((product: any) => (
-              <div key={product.id} className="p-4 transition-shadow bg-white border rounded-lg shadow-sm hover:shadow-md">
-                <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                <p className="mb-2 text-sm text-gray-600">SKU: {product.sku}</p>
-                <div className="flex items-center justify-between mb-3">
+              <div key={product.id} className="flex flex-col p-4 transition-shadow bg-white border rounded-lg shadow-sm hover:shadow-md">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-gray-900 break-words">{product.name}</h3>
+                  <p className="mt-0.5 text-sm text-gray-600">SKU: {product.sku}</p>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-3 mb-3">
                   <p className="text-lg font-bold text-primary">{currency}{Number(product.costPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-gray-500 whitespace-nowrap">
                     {product.stock > 0 ? `${product.stock} left` : 'Out of stock'}
                   </p>
                 </div>
                 <button
                   onClick={() => addToCart(product)}
                   disabled={product.stock <= 0}
-                  className={`w-full px-4 py-2 transition-colors rounded-md ${
+                  className={`mt-auto w-full px-4 py-2 transition-colors rounded-md ${
                     product.stock <= 0
                       ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       : 'bg-primary text-primary-foreground hover:bg-primary/90'
